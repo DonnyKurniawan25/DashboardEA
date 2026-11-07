@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
+import Link from 'next/link';
+import { useAppStore } from '@/store';
 import {
   Wallet,
   TrendingUp,
@@ -110,35 +112,30 @@ function DailyPnLTooltip({ active, payload, label }: { active?: boolean; payload
 // Main Dashboard Page
 // ============================================================
 export default function DashboardPage() {
+  const {
+    accounts: storeAccounts,
+    positions: storePositions,
+    signals: storeSignals,
+    riskMetrics: storeRisk,
+    bots: storeBots,
+    closePosition,
+    toggleBotStatus,
+  } = useAppStore();
+
   // ----- State -----
-  const [accounts, setAccounts] = useState<TradingAccount[] | null>(null);
-  const [positions, setPositions] = useState<OpenPosition[] | null>(null);
-  const [signals, setSignals] = useState<AISignal[] | null>(null);
-  const [risk, setRisk] = useState<RiskMetrics | null>(null);
-  const [bots, setBots] = useState<BotStatus[] | null>(null);
   const [equityData, setEquityData] = useState<EquityChartData[] | null>(null);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [activities, setActivities] = useState<ActivityType[] | null>(null);
   const [chartPeriod, setChartPeriod] = useState('3M');
   const [loading, setLoading] = useState(true);
 
-  // ----- Data Fetching -----
+  // ----- Data Fetching for charts & logs -----
   const fetchData = useCallback(async () => {
     try {
-      const [acc, pos, sig, rsk, bot, ana, act] = await Promise.all([
-        api.getAccounts(),
-        api.getPositions(),
-        api.getAISignals(),
-        api.getRiskMetrics(),
-        api.getBotStatus(),
+      const [ana, act] = await Promise.all([
         api.getAnalytics(),
         api.getActivities(),
       ]);
-      setAccounts(acc);
-      setPositions(pos);
-      setSignals(sig);
-      setRisk(rsk);
-      setBots(bot);
       setAnalytics(ana);
       setActivities(act);
     } catch (e) {
@@ -168,9 +165,13 @@ export default function DashboardPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chartPeriod]);
 
-  // ----- Derived Values -----
-  const account = accounts?.[0];
-  const runningBots = bots?.filter((b) => b.status === 'RUNNING').length ?? 0;
+  // Use Store data directly so CRUD is immediately reactive!
+  const account = storeAccounts[0];
+  const positions = storePositions;
+  const signals = storeSignals;
+  const risk = storeRisk;
+  const bots = storeBots;
+  const runningBots = bots.filter((b) => b.status === 'RUNNING').length;
   const todayPnL = analytics?.dailyPnL?.[analytics.dailyPnL.length - 1]?.pnl ?? 0;
   const last7DailyPnL = analytics?.dailyPnL?.slice(-14) ?? [];
 
@@ -471,13 +472,20 @@ export default function DashboardPage() {
               {positions?.length ?? 0} transaksi aktif di Exness MT5
             </p>
           </div>
-          <NeoBadge variant="info">{positions?.length ?? 0} Terbuka</NeoBadge>
+          <div className="flex items-center gap-2">
+            <Link href="/open-positions">
+              <NeoButton size="sm" variant="secondary" className="text-xs">
+                + Buka Posisi
+              </NeoButton>
+            </Link>
+            <NeoBadge variant="info">{positions?.length ?? 0} Terbuka</NeoBadge>
+          </div>
         </div>
         <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
           <table className="neo-table w-full min-w-[900px] text-sm border-collapse">
             <thead>
               <tr>
-                {['Ticket', 'Symbol', 'Type', 'Lots', 'Entry', 'Current', 'SL', 'TP', 'P/L ($)', 'Durasi', 'Strategi / Bot'].map((h) => (
+                {['Ticket', 'Symbol', 'Type', 'Lots', 'Entry', 'Current', 'SL', 'TP', 'P/L ($)', 'Durasi', 'Strategi / Bot', 'Aksi'].map((h) => (
                   <th
                     key={h}
                     className="py-3 px-3 text-left"
@@ -491,7 +499,7 @@ export default function DashboardPage() {
               {positions?.map((pos) => (
                 <tr
                   key={pos.ticket}
-                  className="transition-colors"
+                  className="transition-colors hover:bg-gray-50 dark:hover:bg-[#07152F]/40"
                 >
                   <td className="py-3 px-3 font-mono text-xs text-gray-600 dark:text-gray-400">#{pos.ticket}</td>
                   <td className="py-3 px-3 font-heading font-bold text-[#050505] dark:text-white">{pos.symbol}</td>
@@ -514,6 +522,15 @@ export default function DashboardPage() {
                   </td>
                   <td className="py-3 px-3 text-gray-600 dark:text-gray-400 text-xs">{formatDuration(pos.duration)}</td>
                   <td className="py-3 px-3 text-xs font-medium text-gray-700 dark:text-gray-300 max-w-[140px] truncate">{pos.strategy}</td>
+                  <td className="py-3 px-3 text-center">
+                    <button
+                      onClick={() => closePosition(pos.ticket)}
+                      title="Tutup Posisi Sekarang"
+                      className="px-2 py-1 bg-[#FF4B57] hover:bg-[#E03E49] text-white border border-[#050505] rounded text-[10px] font-heading font-bold shadow-[1px_1px_0px_#050505]"
+                    >
+                      Tutup
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -750,17 +767,25 @@ export default function DashboardPage() {
                       v{bot.version}
                     </span>
                   </div>
-                  <NeoBadge
-                    variant={
-                      bot.status === 'RUNNING'
-                        ? 'success'
-                        : bot.status === 'PAUSED'
-                        ? 'warning'
-                        : 'danger'
-                    }
-                  >
-                    {bot.status}
-                  </NeoBadge>
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      onClick={() => toggleBotStatus(bot.id)}
+                      className="px-2 py-0.5 text-[10px] font-heading font-bold border border-[#050505] rounded shadow-[1px_1px_0px_#050505] bg-white dark:bg-[#07152F] hover:bg-gray-100 transition-colors"
+                    >
+                      {bot.status === 'RUNNING' ? 'Pause' : 'Resume'}
+                    </button>
+                    <NeoBadge
+                      variant={
+                        bot.status === 'RUNNING'
+                          ? 'success'
+                          : bot.status === 'PAUSED'
+                          ? 'warning'
+                          : 'danger'
+                      }
+                    >
+                      {bot.status}
+                    </NeoBadge>
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
                   <div className="flex items-center gap-1.5 text-gray-600 dark:text-gray-400">

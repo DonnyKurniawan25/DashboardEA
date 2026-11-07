@@ -2,6 +2,7 @@
 
 import React from "react";
 import { cn } from "@/lib/utils";
+import { X } from "lucide-react";
 
 interface NeoCardProps {
   children: React.ReactNode;
@@ -263,5 +264,89 @@ export function StatCard({
         )}
       </div>
     </NeoCard>
+  );
+}
+
+interface NeoModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+  maxWidth?: "sm" | "md" | "lg" | "xl";
+}
+
+export function NeoModal({
+  isOpen,
+  onClose,
+  title,
+  subtitle,
+  children,
+  maxWidth = "md",
+}: NeoModalProps) {
+  if (!isOpen) return null;
+
+  const maxWidths = {
+    sm: "max-w-sm",
+    md: "max-w-md",
+    lg: "max-w-lg",
+    xl: "max-w-2xl",
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#050505]/70 backdrop-blur-xs animate-in fade-in duration-150">
+      <div
+        className={cn(
+          "w-full bg-white dark:bg-[#0D2247] border-3 border-[#050505] shadow-[6px_6px_0px_#050505] rounded-lg overflow-hidden flex flex-col max-h-[90vh]",
+          maxWidths[maxWidth]
+        )}
+      >
+        <div className="flex items-center justify-between p-4 border-b-2 border-[#050505] bg-[#F9FAFB] dark:bg-[#07152F]">
+          <div>
+            <h3 className="font-heading font-bold text-base md:text-lg text-[#050505] dark:text-white">
+              {title}
+            </h3>
+            {subtitle && (
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5 font-medium">
+                {subtitle}
+              </p>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-8 h-8 rounded-md bg-white dark:bg-[#0D2247] border-2 border-[#050505] shadow-[2px_2px_0px_#050505] hover:bg-gray-100 dark:hover:bg-[#132D5E] flex items-center justify-center transition-all"
+          >
+            <X className="w-4 h-4 text-[#050505] dark:text-white" />
+          </button>
+        </div>
+        <div className="p-4 md:p-6 overflow-y-auto space-y-4">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface NeoTextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+  label?: string;
+}
+
+export function NeoTextarea({ label, className, ...props }: NeoTextareaProps) {
+  return (
+    <div className="flex flex-col gap-1">
+      {label && (
+        <label className="text-xs font-heading font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+          {label}
+        </label>
+      )}
+      <textarea
+        className={cn(
+          "px-3 py-2 bg-white dark:bg-[#0D2247] text-[#050505] dark:text-white text-sm border-2 border-[#050505] shadow-[3px_3px_0px_#050505] rounded-md focus:outline-none focus:border-[#1746FF] dark:focus:border-[#00E5FF] transition-all min-h-[80px]",
+          className
+        )}
+        {...props}
+      />
+    </div>
   );
 }

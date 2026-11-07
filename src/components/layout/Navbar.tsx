@@ -30,6 +30,7 @@ export default function Navbar() {
     logout,
     theme,
     toggleTheme,
+    notifications,
   } = useAppStore();
 
   const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
@@ -37,6 +38,7 @@ export default function Navbar() {
 
   const activeAccount =
     accounts.find((a) => a.id === selectedAccount) || accounts[0];
+  const unreadNotifs = notifications?.filter((n) => !n.read).length ?? 0;
 
   return (
     <header className="sticky top-0 z-30 bg-[#FFFFFF] dark:bg-[#07152F] border-b-2 border-[#050505] px-4 md:px-6 py-3 transition-colors duration-200">
@@ -195,7 +197,11 @@ export default function Navbar() {
             className="relative p-2 text-gray-600 dark:text-gray-400 hover:text-[#050505] dark:hover:text-white hover:bg-[#F3F4F6] dark:hover:bg-[#0D2247] rounded-md transition-colors"
           >
             <Bell className="w-5 h-5" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-[#FF4B57] rounded-full border border-white dark:border-[#07152F]" />
+            {unreadNotifs > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 bg-[#FF4B57] text-white text-[9px] font-mono font-bold rounded-full border border-white dark:border-[#07152F] flex items-center justify-center">
+                {unreadNotifs > 9 ? "9+" : unreadNotifs}
+              </span>
+            )}
           </Link>
 
           {/* User Profile Dropdown */}

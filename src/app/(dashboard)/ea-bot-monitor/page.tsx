@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   NeoCard,
   NeoBadge,
   NeoButton,
+  NeoModal,
   PageHeader,
-  Skeleton,
 } from "@/components/ui";
 import {
   formatCurrency,
@@ -16,124 +16,224 @@ import {
   getPnLColor,
   cn,
 } from "@/lib/utils";
-import { api } from "@/services/api";
+import { useAppStore } from "@/store";
 import type { BotStatus } from "@/types";
 import {
   Bot,
-  Brain,
-  Send,
-  Zap,
-  Activity,
-  Shield,
-  ShieldAlert,
-  AlertTriangle,
   Play,
   Pause,
   RotateCcw,
+  AlertTriangle,
   CheckCircle2,
   Clock,
-  Terminal,
-  Wifi,
-  WifiOff,
-  Layers,
-  ChevronDown,
-  ChevronUp,
-  Sliders,
-  Info,
-  GitBranch,
-  Download,
-  FileCode,
+  Zap,
+  Activity,
   Copy,
   Check,
-  ExternalLink,
+  Brain,
+  ShieldAlert,
+  Send,
+  Terminal,
+  ChevronDown,
+  ChevronUp,
+  Info,
+  GitBranch,
+  Sliders,
+  Plus,
+  Edit2,
+  Trash2,
+  XCircle,
 } from "lucide-react";
 
 export default function EABotMonitorPage() {
-  const [bots, setBots] = useState<BotStatus[]>([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    bots,
+    addBot,
+    updateBot,
+    deleteBot,
+    toggleBotStatus,
+  } = useAppStore();
+
   const [expandedLogs, setExpandedLogs] = useState<Record<string, boolean>>({});
-  const [simulationNotice, setSimulationNotice] = useState<string | null>(null);
-  const [selectedPreset, setSelectedPreset] = useState("EXNESS_DEMO_XAUUSDm_SHADOW.set");
   const [copiedPreset, setCopiedPreset] = useState(false);
+  const [toastNotice, setToastNotice] = useState<string | null>(null);
 
-  const fetchBots = async () => {
-    setLoading(true);
-    try {
-      const data = await api.getBotStatus();
-      setBots(data);
-    } catch (err) {
-      console.error("Failed to load bot status:", err);
-    } finally {
-      setLoading(false);
-    }
+  // CRUD Modals
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingBot, setEditingBot] = useState<BotStatus | null>(null);
+  const [deletingBot, setDeletingBot] = useState<BotStatus | null>(null);
+
+  // Form State for Add Bot
+  const [formName, setFormName] = useState("EA-Nevan Scalper Pro");
+  const [formVersion, setFormVersion] = useState("1.220");
+  const [formSymbol, setFormSymbol] = useState("XAUUSDm");
+  const [formStrategy, setFormStrategy] = useState("EMA 20/50 + RSI 14 Confluence");
+  const [formMode, setFormMode] = useState<BotStatus["activeMode"]>("MODERATE");
+  const [formStatus, setFormStatus] = useState<BotStatus["status"]>("RUNNING");
+  const [formGridLevel, setFormGridLevel] = useState("2");
+
+  // Form State for Edit Bot
+  const [editName, setEditName] = useState("");
+  const [editStrategy, setEditStrategy] = useState("");
+  const [editMode, setEditMode] = useState<BotStatus["activeMode"]>("MODERATE");
+  const [editStatus, setEditStatus] = useState<BotStatus["status"]>("RUNNING");
+  const [editGridLevel, setEditGridLevel] = useState("1");
+
+  const showToast = (msg: string) => {
+    setToastNotice(msg);
+    setTimeout(() => setToastNotice(null), 3500);
   };
-
-  useEffect(() => {
-    fetchBots();
-  }, []);
 
   const toggleLogs = (botId: string) => {
     setExpandedLogs((prev) => ({ ...prev, [botId]: !prev[botId] }));
   };
 
-  const handleSimulatedAction = (botName: string, action: string) => {
-    setSimulationNotice(
-      `[EA-NEVAN SAFETY LOCK] Tindakan "${action}" pada bot "${botName}" disimulasikan. Eksekusi live MT5 memerlukan 2FA & Python MT5 Bridge aktif.`
-    );
-    setTimeout(() => setSimulationNotice(null), 5000);
-  };
+  const copyPresetToClipboard = () => {
+    const preset = `// EA-Nevan Configuration Preset for MT5
+// Repository: git@github.com:DonnyKurniawan25/EA-Nevan.git
+// File: GoldShield_DEMO20.mq5
+InpMagicNumber=26011060
+InpSymbol="XAUUSDm"
+InpTimeframe=PERIOD_M15
+InpLotSize=0.01
+InpMaxSpreadPoints=35
+InpFastEMA=20
+InpSlowEMA=50
+InpRSI_Period=14
+InpRSI_Overbought=70.0
+InpRSI_Oversold=30.0
+InpATR_Period=14
+InpSL_Multiplier=1.5
+InpTP_Multiplier=2.5
+InpEquityShieldPct=90.0
+InpMaxDailyLossPct=0.5
+InpMaxConsecutiveLosses=2
+InpMinMarginLevelPct=500.0`;
 
-  const handleCopyPreset = () => {
-    const presetText = `# EA-Nevan Exness GoldShield Preset
-; Generated for MT5 XAUUSDm
-TradeSymbol=XAUUSDm
-SignalTimeframe=15
-TrendTimeframe=60
-MagicNumber=26011060
-ExecutionMode=SHADOW
-BaseLot=0.01
-FastEMAPeriod=20
-SlowEMAPeriod=50
-RSIPeriod=14
-ATRPeriod=14
-StopATRMultiple=2.0
-RewardRiskMultiple=2.0
-EquityShieldMinPctOfReference=90.0
-MaxDailyLossPct=0.5
-MaxConsecutiveLossesPerDay=2
-MaxEntriesPerDay=3
-MinMarginLevelPct=500.0`;
-    navigator.clipboard.writeText(presetText);
+    navigator.clipboard.writeText(preset);
     setCopiedPreset(true);
     setTimeout(() => setCopiedPreset(false), 2500);
+    showToast("Preset EA-Nevan berhasil disalin ke clipboard!");
   };
 
+  // Open Add Modal
+  const handleOpenAdd = () => {
+    setFormName("EA-Nevan Scalper Pro");
+    setFormVersion("1.220");
+    setFormSymbol("XAUUSDm");
+    setFormStrategy("EMA 20/50 + RSI 14 Confluence");
+    setFormMode("MODERATE");
+    setFormStatus("RUNNING");
+    setFormGridLevel("2");
+    setIsAddModalOpen(true);
+  };
+
+  // Handle Add Submit
+  const handleAddSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formName.trim()) return;
+
+    const created = addBot({
+      name: formName.trim(),
+      version: formVersion.trim() || "1.0",
+      symbol: formSymbol,
+      strategy: formStrategy,
+      activeMode: formMode,
+      status: formStatus,
+      currentGridLevel: parseInt(formGridLevel, 10) || 1,
+      basketPnL: 0,
+      totalOpenPositions: 0,
+    });
+
+    setIsAddModalOpen(false);
+    showToast(`Robot "${created.name}" berhasil didaftarkan.`);
+  };
+
+  // Open Edit Modal
+  const handleOpenEdit = (b: BotStatus) => {
+    setEditingBot(b);
+    setEditName(b.name);
+    setEditStrategy(b.strategy);
+    setEditMode(b.activeMode);
+    setEditStatus(b.status);
+    setEditGridLevel(String(b.currentGridLevel));
+  };
+
+  // Handle Edit Submit
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingBot) return;
+
+    updateBot(editingBot.id, {
+      name: editName.trim(),
+      strategy: editStrategy,
+      activeMode: editMode,
+      status: editStatus,
+      currentGridLevel: parseInt(editGridLevel, 10) || editingBot.currentGridLevel,
+    });
+
+    setEditingBot(null);
+    showToast(`Konfigurasi robot "${editName}" berhasil diperbarui.`);
+  };
+
+  // Handle Delete Confirmation
+  const handleConfirmDelete = () => {
+    if (!deletingBot) return;
+    deleteBot(deletingBot.id);
+    showToast(`Robot "${deletingBot.name}" telah dihapus.`);
+    setDeletingBot(null);
+  };
+
+  // Quick Toggle Bot Status
+  const handleToggle = (b: BotStatus) => {
+    toggleBotStatus(b.id);
+    const nextStatus = b.status === "RUNNING" ? "PAUSED" : "RUNNING";
+    showToast(`Robot "${b.name}" diubah ke status ${nextStatus}.`);
+  };
+
+  // Top stats
   const runningCount = bots.filter((b) => b.status === "RUNNING").length;
   const pausedCount = bots.filter((b) => b.status === "PAUSED").length;
   const totalBasketPnL = bots.reduce((acc, b) => acc + b.basketPnL, 0);
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <PageHeader
         title="EA / Bot Monitor"
-        subtitle="Monitoring & Telemetri Robot Trading EA-Nevan (GoldShield AI v1.220)"
+        subtitle="Monitoring Robot Trading Algoritmik EA-Nevan & Eksekusi Grid Recovery MT5"
       >
         <NeoButton
-          variant="outline"
+          variant="secondary"
           size="sm"
-          onClick={fetchBots}
+          onClick={handleOpenAdd}
           className="flex items-center gap-1.5"
         >
-          <RotateCcw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
-          Refresh Heartbeat
+          <Plus className="w-4 h-4" />
+          <span>Daftarkan Bot Baru</span>
         </NeoButton>
-        <NeoBadge variant="info">DEMO20 ACTIVE</NeoBadge>
       </PageHeader>
+
+      {/* Toast Notification */}
+      {toastNotice && (
+        <div className="p-3 bg-[#74FF44]/20 border-2 border-[#050505] shadow-[3px_3px_0px_#050505] rounded-md text-xs font-heading font-bold text-[#050505] dark:text-white flex items-center justify-between animate-in fade-in duration-150">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-[#00B843] dark:text-[#74FF44] shrink-0" />
+            <span>{toastNotice}</span>
+          </div>
+          <button
+            onClick={() => setToastNotice(null)}
+            className="text-gray-500 hover:text-black dark:hover:text-white"
+          >
+            <XCircle className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {/* Safety & Protocol Banner */}
       <div className="p-4 bg-white dark:bg-[#07152F] border-2 border-[#050505] shadow-[4px_4px_0px_#050505] rounded-md">
         <div className="flex items-start gap-3">
-          <ShieldAlert className="w-5 h-5 text-[#1746FF] dark:text-[#FFE600] shrink-0 mt-0.5" />
+          <ShieldAlert className="w-5 h-5 text-[#1746FF] dark:text-[#00E5FF] shrink-0 mt-0.5" />
           <div className="flex-1">
             <h4 className="font-heading font-bold text-[#050505] dark:text-white text-sm flex items-center gap-2">
               MONITORING MODE AKTIF — EA-NEVAN V1.220
@@ -142,19 +242,11 @@ MinMarginLevelPct=500.0`;
               </span>
             </h4>
             <p className="text-xs text-gray-700 dark:text-gray-300 mt-1 leading-relaxed">
-              Dashboard ini disesuaikan khusus untuk robot trading <strong>EA-Nevan</strong> (repository: <code className="bg-gray-100 dark:bg-[#0D2247] px-1 py-0.5 rounded font-mono text-[11px] font-bold text-[#1746FF] dark:text-[#00E5FF]">git@github.com:DonnyKurniawan25/EA-Nevan.git</code>). Halaman ini digunakan untuk memantau status, strategi, margin, dan sinyal. Modifikasi parameter langsung ke broker MT5 diamankan dengan fail-safe protocol.
+              Dashboard ini disesuaikan khusus untuk robot trading <strong>EA-Nevan</strong> (repository: <code className="bg-gray-100 dark:bg-[#0D2247] px-1 py-0.5 rounded font-mono text-[11px] font-bold text-[#1746FF] dark:text-[#00E5FF]">git@github.com:DonnyKurniawan25/EA-Nevan.git</code>). Halaman ini mendukung CRUD profil robot, kontrol status RUN/PAUSE seketika, dan parameter grid.
             </p>
           </div>
         </div>
       </div>
-
-      {/* Action Notification */}
-      {simulationNotice && (
-        <div className="p-3 bg-[#00E5FF]/20 border-2 border-[#050505] shadow-[3px_3px_0px_#050505] rounded-md text-xs font-heading font-bold text-[#050505] dark:text-white flex items-center gap-2">
-          <Info className="w-4 h-4 text-[#1746FF] dark:text-[#00E5FF] shrink-0" />
-          <span>{simulationNotice}</span>
-        </div>
-      )}
 
       {/* Top Bot Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
@@ -175,7 +267,7 @@ MinMarginLevelPct=500.0`;
           <p className="text-2xl font-heading font-bold text-[#D97706] dark:text-[#FFE600]">
             {pausedCount} PAUSED
           </p>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Manual pause state</p>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Status kontrol manual</p>
         </NeoCard>
 
         <NeoCard className="p-4">
@@ -250,44 +342,27 @@ MinMarginLevelPct=500.0`;
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-heading font-bold text-[#050505] dark:text-white flex items-center gap-1.5">
-                <FileCode className="w-4 h-4 text-[#1746FF] dark:text-[#00E5FF]" />
-                Preset Aktif: <code className="font-mono text-xs">{selectedPreset}</code>
+                <Sliders className="w-3.5 h-3.5 text-[#1746FF] dark:text-[#00E5FF]" />
+                Preset Parameter EA MT5 (.set ready)
               </span>
               <button
-                onClick={handleCopyPreset}
-                className="neo-btn py-1 px-2.5 bg-[#00E5FF] hover:bg-[#00C8E0] text-[#050505] text-[11px] font-heading font-bold rounded flex items-center gap-1"
+                onClick={copyPresetToClipboard}
+                className="px-2.5 py-1 text-xs bg-white dark:bg-[#07152F] text-[#050505] dark:text-white border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505] hover:bg-gray-100 dark:hover:bg-[#132D5E] font-heading font-bold flex items-center gap-1 transition-all"
               >
                 {copiedPreset ? (
                   <>
-                    <Check className="w-3.5 h-3.5 text-black" /> Tersalin!
+                    <Check className="w-3.5 h-3.5 text-[#00B843]" /> Tersalin!
                   </>
                 ) : (
                   <>
-                    <Copy className="w-3.5 h-3.5" /> Salin Preset .SET
+                    <Copy className="w-3.5 h-3.5" /> Salin Preset
                   </>
                 )}
               </button>
             </div>
-
-            <pre className="p-3 bg-[#F9FAFB] dark:bg-[#050B16] border-2 border-[#050505] rounded-md font-mono text-[11px] text-[#050505] dark:text-gray-300 overflow-x-auto max-h-36 leading-relaxed">
-{`; EA-Nevan Exness GoldShield Preset (DEMO20 BOUNDED)
-TradeSymbol=XAUUSDm
-SignalTimeframe=PERIOD_M15
-TrendTimeframe=PERIOD_H1
-MagicNumber=26011060
-ExecutionMode=SHADOW ; default safe shadow mode
-BaseLot=0.01
-FastEMAPeriod=20
-SlowEMAPeriod=50
-RSIPeriod=14
-ATRPeriod=14
-StopATRMultiple=2.0
-RewardRiskMultiple=2.0
-EquityShieldMinPctOfReference=90.0
-MaxDailyLossPct=0.5
-MaxConsecutiveLossesPerDay=2
-MaxEntriesPerDay=3
-MinMarginLevelPct=500.0`}
+            <pre className="p-3 bg-gray-900 text-[#00E5FF] text-[11px] font-mono rounded border-2 border-[#050505] overflow-x-auto leading-relaxed shadow-[2px_2px_0px_#050505]">
+{`InpMagicNumber=26011060 | InpSymbol="XAUUSDm" | InpTimeframe=PERIOD_M15 | InpLotSize=0.01
+InpFastEMA=20 | InpSlowEMA=50 | InpRSI_Period=14 | InpATR_Period=14 | InpEquityShieldPct=90.0`}
             </pre>
           </div>
         </NeoCard>
@@ -314,55 +389,48 @@ MinMarginLevelPct=500.0`}
               Salin folder <code className="font-mono bg-gray-100 dark:bg-[#07152F] px-1 py-0.5 rounded font-bold">GoldShieldDemo20/</code> ke folder <code className="font-mono">MQL5/Include</code>.
             </li>
             <li className="leading-snug">
-              Buka chart <strong>XAUUSDm</strong> (M15) di Exness MT5, lalu drag EA ke chart.
+              Kompilasi di MetaEditor & pasang pada grafik <strong>XAUUSD M15</strong>.
             </li>
             <li className="leading-snug">
-              Centang <strong>Allow Algo Trading</strong> dan muat preset <code className="font-mono">EXNESS_DEMO_XAUUSDm_SHADOW.set</code>.
-            </li>
-            <li className="leading-snug">
-              Jalankan bridge Python: <code className="font-mono bg-gray-100 dark:bg-[#07152F] px-1 py-0.5 rounded font-bold">python backend/main.py</code> untuk telemetri real-time.
+              Pastikan tombol <strong>Algo Trading</strong> di MT5 berwarna hijau.
             </li>
           </ol>
         </NeoCard>
       </div>
 
-      {/* Bots Grid */}
-      {loading ? (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <NeoCard key={i} className="p-6 space-y-4">
-              <Skeleton className="h-6 w-36" />
-              <Skeleton className="h-24 w-full" />
-              <Skeleton className="h-10 w-full" />
-            </NeoCard>
-          ))}
+      {/* Bot Cards Grid (CRUD) */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Bot className="w-5 h-5 text-[#1746FF] dark:text-[#00E5FF]" />
+            <h3 className="font-heading font-bold text-[#050505] dark:text-white text-lg">
+              Instance Robot Trading Aktif ({bots.length})
+            </h3>
+          </div>
+          <NeoButton size="sm" onClick={handleOpenAdd} className="flex items-center gap-1">
+            <Plus className="w-4 h-4" /> Daftarkan Bot
+          </NeoButton>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {bots.map((bot) => (
-            <NeoCard key={bot.id} className="p-0 overflow-hidden">
-              {/* Card Header */}
-              <div className="p-5 border-b-2 border-[#050505] bg-[#F9FAFB] dark:bg-[#07152F]">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-[#1746FF] border-2 border-[#050505] shadow-[2px_2px_0px_#050505] rounded-md flex items-center justify-center">
-                      <Bot className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="font-heading font-bold text-[#050505] dark:text-white text-base">
-                        {bot.name}
-                      </h3>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-xs font-mono font-bold text-[#1746FF] dark:text-[#00E5FF]">
-                          {bot.symbol}
-                        </span>
-                        <span className="text-[10px] text-gray-500 font-bold">
-                          v{bot.version}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
 
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {bots.map((bot) => (
+            <NeoCard key={bot.id} className="p-0 overflow-hidden" hover>
+              {/* Card Header */}
+              <div className="p-4 border-b-2 border-[#050505] bg-[#F9FAFB] dark:bg-[#07152F] flex items-start justify-between">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-heading font-bold text-base text-[#050505] dark:text-white">
+                      {bot.name}
+                    </span>
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 bg-white dark:bg-[#07152F] rounded border border-[#050505] font-bold">
+                      v{bot.version}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-600 dark:text-gray-400 font-mono mt-0.5">
+                    Simbol: <strong className="text-[#1746FF] dark:text-[#00E5FF]">{bot.symbol}</strong>
+                  </p>
+                </div>
+                <div className="flex items-center gap-1">
                   <NeoBadge
                     variant={
                       bot.status === "RUNNING"
@@ -377,26 +445,19 @@ MinMarginLevelPct=500.0`}
                 </div>
               </div>
 
-              {/* Bot Info Body */}
-              <div className="p-5 space-y-4">
+              {/* Card Body */}
+              <div className="p-4 space-y-4">
                 {/* Mode & Strategy */}
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="p-2.5 bg-[#F9FAFB] dark:bg-[#07152F] border-2 border-[#050505] rounded">
-                    <span className="text-[10px] font-heading font-bold text-gray-500 uppercase block">
-                      Strategi
-                    </span>
-                    <span className="font-heading font-bold text-[#050505] dark:text-white truncate block mt-0.5">
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-600 dark:text-gray-400 font-medium">Strategi:</span>
+                    <span className="font-bold text-[#050505] dark:text-white truncate max-w-[170px]">
                       {bot.strategy}
                     </span>
                   </div>
-
-                  <div className="p-2.5 bg-[#F9FAFB] dark:bg-[#07152F] border-2 border-[#050505] rounded">
-                    <span className="text-[10px] font-heading font-bold text-gray-500 uppercase block">
-                      Mode Eksekusi
-                    </span>
-                    <span className="font-heading font-bold text-[#1746FF] dark:text-[#00E5FF] block mt-0.5">
-                      {bot.activeMode}
-                    </span>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-gray-600 dark:text-gray-400 font-medium">Mode:</span>
+                    <NeoBadge variant="info">{bot.activeMode}</NeoBadge>
                   </div>
                 </div>
 
@@ -468,13 +529,13 @@ MinMarginLevelPct=500.0`}
                   </div>
                 </div>
 
-                {/* Control Action Buttons (Simulated with Safe Confirm) */}
-                <div className="grid grid-cols-2 gap-2 pt-2 border-t-2 border-[#050505]">
+                {/* Control Action Buttons (CRUD) */}
+                <div className="grid grid-cols-3 gap-2 pt-2 border-t-2 border-[#050505]">
                   <NeoButton
                     variant={bot.status === "RUNNING" ? "warning" : "success"}
                     size="sm"
-                    onClick={() => handleSimulatedAction(bot.name, bot.status === "RUNNING" ? "Pause" : "Resume")}
-                    className="flex items-center justify-center gap-1.5 text-xs"
+                    onClick={() => handleToggle(bot)}
+                    className="flex items-center justify-center gap-1 text-xs"
                   >
                     {bot.status === "RUNNING" ? (
                       <>
@@ -490,10 +551,19 @@ MinMarginLevelPct=500.0`}
                   <NeoButton
                     variant="outline"
                     size="sm"
-                    onClick={() => handleSimulatedAction(bot.name, "Restart")}
-                    className="flex items-center justify-center gap-1.5 text-xs"
+                    onClick={() => handleOpenEdit(bot)}
+                    className="flex items-center justify-center gap-1 text-xs"
                   >
-                    <RotateCcw className="w-3 h-3" /> Restart
+                    <Edit2 className="w-3 h-3" /> Edit
+                  </NeoButton>
+
+                  <NeoButton
+                    variant="danger"
+                    size="sm"
+                    onClick={() => setDeletingBot(bot)}
+                    className="flex items-center justify-center gap-1 text-xs"
+                  >
+                    <Trash2 className="w-3 h-3" /> Hapus
                   </NeoButton>
                 </div>
 
@@ -504,7 +574,7 @@ MinMarginLevelPct=500.0`}
                     className="w-full flex items-center justify-between text-xs text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white py-1.5 px-2 rounded bg-[#F9FAFB] dark:bg-[#07152F] border-2 border-[#050505]"
                   >
                     <span className="flex items-center gap-1.5 font-heading font-bold">
-                      <Terminal className="w-3.5 h-3.5 text-[#1746FF] dark:text-[#FFE600]" />
+                      <Terminal className="w-3.5 h-3.5 text-[#1746FF] dark:text-[#00E5FF]" />
                       Diagnostik & Log ({bot.errorLogs.length})
                     </span>
                     {expandedLogs[bot.id] ? (
@@ -538,7 +608,257 @@ MinMarginLevelPct=500.0`}
             </NeoCard>
           ))}
         </div>
-      )}
+      </div>
+
+      {/* ─── MODAL 1: DAFTARKAN BOT BARU (CREATE) ──────────── */}
+      <NeoModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        title="Daftarkan Robot Trading Baru"
+        subtitle="Registrasikan algoritma trading baru untuk dipantau di dashboard"
+      >
+        <form onSubmit={handleAddSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-heading font-bold text-gray-700 dark:text-gray-300 uppercase block mb-1">
+                Nama Robot
+              </label>
+              <input
+                type="text"
+                value={formName}
+                onChange={(e) => setFormName(e.target.value)}
+                className="w-full text-xs p-2 bg-white dark:bg-[#07152F] border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505] font-bold"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-heading font-bold text-gray-700 dark:text-gray-300 uppercase block mb-1">
+                Versi
+              </label>
+              <input
+                type="text"
+                value={formVersion}
+                onChange={(e) => setFormVersion(e.target.value)}
+                className="w-full text-xs p-2 bg-white dark:bg-[#07152F] border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505] font-mono font-bold"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-heading font-bold text-gray-700 dark:text-gray-300 uppercase block mb-1">
+                Simbol Target
+              </label>
+              <select
+                value={formSymbol}
+                onChange={(e) => setFormSymbol(e.target.value)}
+                className="w-full text-xs p-2 bg-white dark:bg-[#07152F] border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505] font-bold"
+              >
+                <option value="XAUUSDm">XAUUSDm</option>
+                <option value="XAUUSD">XAUUSD</option>
+                <option value="EURUSD">EURUSD</option>
+                <option value="GBPUSD">GBPUSD</option>
+                <option value="USDJPY">USDJPY</option>
+                <option value="BTCUSD">BTCUSD</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-xs font-heading font-bold text-gray-700 dark:text-gray-300 uppercase block mb-1">
+                Mode Agresivitas
+              </label>
+              <select
+                value={formMode}
+                onChange={(e) => setFormMode(e.target.value as BotStatus["activeMode"])}
+                className="w-full text-xs p-2 bg-white dark:bg-[#07152F] border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505] font-bold"
+              >
+                <option value="CONSERVATIVE">CONSERVATIVE</option>
+                <option value="MODERATE">MODERATE</option>
+                <option value="AGGRESSIVE">AGGRESSIVE</option>
+                <option value="SAFE_MODE">SAFE_MODE</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-heading font-bold text-gray-700 dark:text-gray-300 uppercase block mb-1">
+                Strategi Algoritma
+              </label>
+              <input
+                type="text"
+                value={formStrategy}
+                onChange={(e) => setFormStrategy(e.target.value)}
+                className="w-full text-xs p-2 bg-white dark:bg-[#07152F] border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505] font-bold"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-heading font-bold text-gray-700 dark:text-gray-300 uppercase block mb-1">
+                Status Awal
+              </label>
+              <select
+                value={formStatus}
+                onChange={(e) => setFormStatus(e.target.value as BotStatus["status"])}
+                className="w-full text-xs p-2 bg-white dark:bg-[#07152F] border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505] font-bold"
+              >
+                <option value="RUNNING">RUNNING</option>
+                <option value="PAUSED">PAUSED</option>
+                <option value="SAFE_MODE">SAFE_MODE</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="pt-2 flex items-center justify-end gap-2 border-t border-gray-200 dark:border-[#132D5E]">
+            <NeoButton
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsAddModalOpen(false)}
+            >
+              Batal
+            </NeoButton>
+            <NeoButton type="submit" variant="primary" size="sm">
+              Daftarkan Robot
+            </NeoButton>
+          </div>
+        </form>
+      </NeoModal>
+
+      {/* ─── MODAL 2: EDIT BOT (UPDATE) ───────────────────── */}
+      <NeoModal
+        isOpen={!!editingBot}
+        onClose={() => setEditingBot(null)}
+        title="Konfigurasi Robot Trading"
+        subtitle={`Ubah parameter operasional untuk ${editingBot?.name}`}
+      >
+        <form onSubmit={handleEditSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-heading font-bold text-gray-700 dark:text-gray-300 uppercase block mb-1">
+                Nama Robot
+              </label>
+              <input
+                type="text"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                className="w-full text-xs p-2 bg-white dark:bg-[#07152F] border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505] font-bold"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-heading font-bold text-gray-700 dark:text-gray-300 uppercase block mb-1">
+                Status Operasional
+              </label>
+              <select
+                value={editStatus}
+                onChange={(e) => setEditStatus(e.target.value as BotStatus["status"])}
+                className="w-full text-xs p-2 bg-white dark:bg-[#07152F] border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505] font-bold"
+              >
+                <option value="RUNNING">RUNNING (Berjalan)</option>
+                <option value="PAUSED">PAUSED (Jeda)</option>
+                <option value="SAFE_MODE">SAFE_MODE (Proteksi)</option>
+                <option value="DISCONNECTED">DISCONNECTED</option>
+                <option value="ERROR">ERROR</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-heading font-bold text-gray-700 dark:text-gray-300 uppercase block mb-1">
+                Mode Trading
+              </label>
+              <select
+                value={editMode}
+                onChange={(e) => setEditMode(e.target.value as BotStatus["activeMode"])}
+                className="w-full text-xs p-2 bg-white dark:bg-[#07152F] border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505] font-bold"
+              >
+                <option value="CONSERVATIVE">CONSERVATIVE</option>
+                <option value="MODERATE">MODERATE</option>
+                <option value="AGGRESSIVE">AGGRESSIVE</option>
+                <option value="SAFE_MODE">SAFE_MODE</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-xs font-heading font-bold text-gray-700 dark:text-gray-300 uppercase block mb-1">
+                Current Grid Level
+              </label>
+              <input
+                type="number"
+                min="1"
+                max="10"
+                value={editGridLevel}
+                onChange={(e) => setEditGridLevel(e.target.value)}
+                className="w-full text-xs p-2 bg-white dark:bg-[#07152F] border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505] font-mono font-bold"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-heading font-bold text-gray-700 dark:text-gray-300 uppercase block mb-1">
+              Strategi
+            </label>
+            <input
+              type="text"
+              value={editStrategy}
+              onChange={(e) => setEditStrategy(e.target.value)}
+              className="w-full text-xs p-2 bg-white dark:bg-[#07152F] border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505] font-bold"
+            />
+          </div>
+
+          <div className="pt-2 flex items-center justify-end gap-2 border-t border-gray-200 dark:border-[#132D5E]">
+            <NeoButton
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setEditingBot(null)}
+            >
+              Batal
+            </NeoButton>
+            <NeoButton type="submit" variant="primary" size="sm">
+              Simpan Konfigurasi
+            </NeoButton>
+          </div>
+        </form>
+      </NeoModal>
+
+      {/* ─── MODAL 3: DELETE BOT ──────────────────────────── */}
+      <NeoModal
+        isOpen={!!deletingBot}
+        onClose={() => setDeletingBot(null)}
+        title="Hapus Robot Trading"
+        subtitle="Hapus instance robot dari dashboard monitoring"
+        maxWidth="sm"
+      >
+        <div className="space-y-4">
+          <p className="text-xs text-gray-700 dark:text-gray-300">
+            Apakah Anda yakin ingin menghapus robot{" "}
+            <strong>{deletingBot?.name} ({deletingBot?.symbol})</strong>?
+          </p>
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-200 dark:border-[#132D5E]">
+            <NeoButton
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setDeletingBot(null)}
+            >
+              Batal
+            </NeoButton>
+            <NeoButton
+              type="button"
+              variant="danger"
+              size="sm"
+              onClick={handleConfirmDelete}
+            >
+              Hapus Robot
+            </NeoButton>
+          </div>
+        </div>
+      </NeoModal>
     </div>
   );
 }

@@ -243,6 +243,14 @@ export interface AppState {
   isAuthenticated: boolean;
   selectedAccount: string | null;
   accounts: TradingAccount[];
+  positions: OpenPosition[];
+  orders: TradeOrder[];
+  bots: BotStatus[];
+  signals: AISignal[];
+  decisions: AIDecision[];
+  riskMetrics: RiskMetrics;
+  riskEvents: RiskEvent[];
+  notifications: Notification[];
   demoMode: boolean;
   sidebarCollapsed: boolean;
   theme: "light" | "dark";

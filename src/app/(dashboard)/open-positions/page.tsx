@@ -1,14 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import {
   NeoCard,
   NeoBadge,
   NeoButton,
-  NeoInput,
-  NeoSelect,
+  NeoModal,
   PageHeader,
-  Skeleton,
 } from "@/components/ui";
 import {
   formatCurrency,
@@ -19,50 +17,193 @@ import {
   getPnLColor,
   cn,
 } from "@/lib/utils";
-import { api } from "@/services/api";
+import { useAppStore } from "@/store";
 import type { OpenPosition } from "@/types";
 import {
   BarChart3,
   TrendingUp,
-  TrendingDown,
+  Search,
+  XCircle,
+  Layers,
+  AlertCircle,
+  Plus,
+  Edit2,
+  Trash2,
+  CheckCircle2,
   ArrowUpRight,
   ArrowDownRight,
-  Search,
-  Filter,
-  RefreshCw,
-  XCircle,
-  SlidersHorizontal,
-  Clock,
-  Layers,
-  DollarSign,
-  AlertCircle,
-  ShieldCheck,
 } from "lucide-react";
 
 export default function OpenPositionsPage() {
-  const [positions, setPositions] = useState<OpenPosition[]>([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    positions,
+    addPosition,
+    updatePosition,
+    closePosition,
+    deletePosition,
+  } = useAppStore();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<string>("ALL");
   const [sortBy, setSortBy] = useState<"pnl" | "lots" | "duration">("pnl");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [actionNotice, setActionNotice] = useState<string | null>(null);
+  const [toastNotice, setToastNotice] = useState<string | null>(null);
 
-  const fetchPositions = async () => {
-    setLoading(true);
-    try {
-      const data = await api.getPositions();
-      setPositions(data);
-    } catch (err) {
-      console.error("Failed to load positions:", err);
-    } finally {
-      setLoading(false);
+  // CRUD Modals
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingPosition, setEditingPosition] = useState<OpenPosition | null>(null);
+  const [closingPosition, setClosingPosition] = useState<OpenPosition | null>(null);
+  const [deletingPosition, setDeletingPosition] = useState<OpenPosition | null>(null);
+
+  // Form State for Add Position
+  const [formSymbol, setFormSymbol] = useState("XAUUSDm");
+  const [formType, setFormType] = useState<"BUY" | "SELL">("BUY");
+  const [formLots, setFormLots] = useState("0.01");
+  const [formEntryPrice, setFormEntryPrice] = useState("2685.20");
+  const [formStopLoss, setFormStopLoss] = useState("2670.00");
+  const [formTakeProfit, setFormTakeProfit] = useState("2705.00");
+  const [formStrategy, setFormStrategy] = useState("EA-Nevan Scalper Pro");
+  const [formError, setFormError] = useState<string | null>(null);
+
+  // Form State for Edit Position
+  const [editStopLoss, setEditStopLoss] = useState("");
+  const [editTakeProfit, setEditTakeProfit] = useState("");
+  const [editLots, setEditLots] = useState("");
+  const [editStrategy, setEditStrategy] = useState("");
+  const [editCurrentPrice, setEditCurrentPrice] = useState("");
+
+  const showToast = (msg: string) => {
+    setToastNotice(msg);
+    setTimeout(() => setToastNotice(null), 3500);
+  };
+
+  // Open Add Modal with sensible defaults per symbol
+  const handleOpenAdd = () => {
+    setFormSymbol("XAUUSDm");
+    setFormType("BUY");
+    setFormLots("0.01");
+    setFormEntryPrice("2685.20");
+    setFormStopLoss("2670.00");
+    setFormTakeProfit("2705.00");
+    setFormStrategy("EA-Nevan Scalper Pro");
+    setFormError(null);
+    setIsAddModalOpen(true);
+  };
+
+  // Symbol change helper
+  const handleSymbolChange = (sym: string) => {
+    setFormSymbol(sym);
+    if (sym === "XAUUSDm" || sym === "XAUUSD") {
+      setFormEntryPrice("2685.20");
+      setFormStopLoss("2670.00");
+      setFormTakeProfit("2705.00");
+    } else if (sym === "EURUSD") {
+      setFormEntryPrice("1.0845");
+      setFormStopLoss("1.0800");
+      setFormTakeProfit("1.0920");
+    } else if (sym === "GBPUSD") {
+      setFormEntryPrice("1.2980");
+      setFormStopLoss("1.2920");
+      setFormTakeProfit("1.3060");
+    } else if (sym === "USDJPY") {
+      setFormEntryPrice("152.40");
+      setFormStopLoss("151.60");
+      setFormTakeProfit("153.80");
+    } else if (sym === "BTCUSD") {
+      setFormEntryPrice("88400.00");
+      setFormStopLoss("86000.00");
+      setFormTakeProfit("92000.00");
     }
   };
 
-  useEffect(() => {
-    fetchPositions();
-  }, []);
+  // Handle Create Submit
+  const handleCreateSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const lots = parseFloat(formLots);
+    const entry = parseFloat(formEntryPrice);
+    if (!lots || lots <= 0) {
+      setFormError("Ukuran lot harus lebih besar dari 0.");
+      return;
+    }
+    if (!entry || entry <= 0) {
+      setFormError("Harga entry harus valid.");
+      return;
+    }
+
+    const sl = formStopLoss.trim() ? parseFloat(formStopLoss) : null;
+    const tp = formTakeProfit.trim() ? parseFloat(formTakeProfit) : null;
+
+    const newPos = addPosition({
+      symbol: formSymbol,
+      type: formType,
+      lots,
+      entryPrice: entry,
+      currentPrice: entry,
+      stopLoss: sl,
+      takeProfit: tp,
+      strategy: formStrategy,
+    });
+
+    setIsAddModalOpen(false);
+    showToast(`Posisi #${newPos.ticket} (${newPos.type} ${newPos.lots} Lot ${newPos.symbol}) berhasil dibuka!`);
+  };
+
+  // Open Edit Modal
+  const handleOpenEdit = (pos: OpenPosition) => {
+    setEditingPosition(pos);
+    setEditStopLoss(pos.stopLoss ? String(pos.stopLoss) : "");
+    setEditTakeProfit(pos.takeProfit ? String(pos.takeProfit) : "");
+    setEditLots(String(pos.lots));
+    setEditStrategy(pos.strategy);
+    setEditCurrentPrice(String(pos.currentPrice));
+  };
+
+  // Handle Edit Submit
+  const handleEditSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingPosition) return;
+
+    const sl = editStopLoss.trim() ? parseFloat(editStopLoss) : null;
+    const tp = editTakeProfit.trim() ? parseFloat(editTakeProfit) : null;
+    const lots = parseFloat(editLots) || editingPosition.lots;
+    const curPrice = parseFloat(editCurrentPrice) || editingPosition.currentPrice;
+
+    // Recalculate PnL
+    const isGold = editingPosition.symbol.includes("XAU") || editingPosition.symbol.includes("GOLD");
+    const multiplier = isGold ? 100 : 100000;
+    const diff = editingPosition.type === "BUY" ? curPrice - editingPosition.entryPrice : editingPosition.entryPrice - curPrice;
+    const floatingPnL = Math.round((diff * lots * multiplier) * 100) / 100;
+    const floatingPips = Math.round((isGold ? diff * 10 : diff * 10000) * 10) / 10;
+
+    updatePosition(editingPosition.ticket, {
+      stopLoss: sl,
+      takeProfit: tp,
+      lots,
+      strategy: editStrategy,
+      currentPrice: curPrice,
+      floatingPnL,
+      floatingPips,
+    });
+
+    setEditingPosition(null);
+    showToast(`Posisi #${editingPosition.ticket} berhasil diperbarui.`);
+  };
+
+  // Handle Confirm Close Position
+  const handleConfirmClose = () => {
+    if (!closingPosition) return;
+    closePosition(closingPosition.ticket, closingPosition.currentPrice);
+    showToast(`Posisi #${closingPosition.ticket} (${closingPosition.symbol}) telah ditutup dan dipindahkan ke Riwayat Transaksi.`);
+    setClosingPosition(null);
+  };
+
+  // Handle Confirm Delete Position
+  const handleConfirmDelete = () => {
+    if (!deletingPosition) return;
+    deletePosition(deletingPosition.ticket);
+    showToast(`Posisi #${deletingPosition.ticket} telah dihapus dari daftar.`);
+    setDeletingPosition(null);
+  };
 
   // Filter & Sort
   const filteredPositions = useMemo(() => {
@@ -102,37 +243,35 @@ export default function OpenPositionsPage() {
     ? Math.max(...positions.map((p) => p.floatingPnL))
     : 0;
 
-  const handleSimulatedClose = (ticket: string) => {
-    setActionNotice(`[DEMO ACTION] Permintaan penutupan order #${ticket} disimulasikan. Eksekusi MT5 sesungguhnya memerlukan bridge aktif.`);
-    setTimeout(() => setActionNotice(null), 4000);
-  };
-
   return (
     <div className="space-y-6">
+      {/* Header */}
       <PageHeader
         title="Open Positions"
         subtitle="Pemantauan Real-Time Order MT5 & Transaksi Aktif Robot EA-Nevan"
       >
         <NeoButton
-          variant="outline"
+          variant="secondary"
           size="sm"
-          onClick={fetchPositions}
+          onClick={handleOpenAdd}
           className="flex items-center gap-1.5"
         >
-          <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
-          Refresh
+          <Plus className="w-4 h-4" />
+          <span>Buka Posisi Baru</span>
         </NeoButton>
-        <NeoBadge variant="warning">DEMO DATA</NeoBadge>
       </PageHeader>
 
-      {/* Simulated action banner */}
-      {actionNotice && (
-        <div className="p-3 bg-[#00E5FF]/20 border-2 border-[#050505] shadow-[3px_3px_0px_#050505] rounded-md text-xs font-heading font-bold text-[#050505] dark:text-white flex items-center justify-between">
+      {/* Toast Notification Banner */}
+      {toastNotice && (
+        <div className="p-3 bg-[#74FF44]/20 border-2 border-[#050505] shadow-[3px_3px_0px_#050505] rounded-md text-xs font-heading font-bold text-[#050505] dark:text-white flex items-center justify-between animate-in fade-in duration-150">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="w-4 h-4 text-[#1746FF] dark:text-[#00E5FF]" />
-            <span>{actionNotice}</span>
+            <CheckCircle2 className="w-4 h-4 text-[#00B843] dark:text-[#74FF44] shrink-0" />
+            <span>{toastNotice}</span>
           </div>
-          <button onClick={() => setActionNotice(null)} className="text-gray-500 hover:text-black dark:hover:text-white">
+          <button
+            onClick={() => setToastNotice(null)}
+            className="text-gray-500 hover:text-black dark:hover:text-white"
+          >
             <XCircle className="w-4 h-4" />
           </button>
         </div>
@@ -148,7 +287,7 @@ export default function OpenPositionsPage() {
             <Layers className="w-4 h-4 text-[#1746FF] dark:text-[#00E5FF]" />
           </div>
           <p className="text-2xl font-mono font-bold text-[#050505] dark:text-white">
-            {positions.length}
+            {positions.length} Posisi
           </p>
           <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 font-medium">
             {buyPositions} Long / {sellPositions} Short
@@ -160,13 +299,17 @@ export default function OpenPositionsPage() {
             <p className="text-[10px] font-heading font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
               Total Floating P/L
             </p>
-            <DollarSign className="w-4 h-4 text-[#00B843] dark:text-[#74FF44]" />
+            {totalPnL >= 0 ? (
+              <TrendingUp className="w-4 h-4 text-[#00B843] dark:text-[#74FF44]" />
+            ) : (
+              <TrendingUp className="w-4 h-4 text-[#FF3B30] dark:text-[#FF4B57]" />
+            )}
           </div>
           <p className={cn("text-2xl font-mono font-bold", getPnLColor(totalPnL))}>
             {formatPnL(totalPnL)}
           </p>
           <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 font-medium">
-            {totalPnL >= 0 ? "Floating Profit Bersih" : "Dalam Drawdown"}
+            Margin Aktif
           </p>
         </NeoCard>
 
@@ -180,7 +323,9 @@ export default function OpenPositionsPage() {
           <p className="text-2xl font-mono font-bold text-[#050505] dark:text-white">
             {formatNumber(totalLots, 2)} Lot
           </p>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 font-medium">Di 5 Pasangan Mata Uang</p>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 font-medium">
+            Total Exposure
+          </p>
         </NeoCard>
 
         <NeoCard className="p-4">
@@ -193,7 +338,9 @@ export default function OpenPositionsPage() {
           <p className="text-2xl font-mono font-bold text-[#00B843] dark:text-[#74FF44]">
             +{formatCurrency(highestWin)}
           </p>
-          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 font-medium">Leading: XAUUSDm BUY</p>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 font-medium">
+            Floating Posisi Teratas
+          </p>
         </NeoCard>
       </div>
 
@@ -207,7 +354,7 @@ export default function OpenPositionsPage() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Cari ticket, simbol, bot..."
+                placeholder="Cari ticket, simbol, strategi..."
                 className="w-full pl-9 pr-3 py-1.5 bg-white dark:bg-[#07152F] text-[#050505] dark:text-white text-xs border-2 border-[#050505] shadow-[2px_2px_0px_#050505] rounded-md focus:outline-none focus:border-[#1746FF] dark:focus:border-[#00E5FF]"
               />
             </div>
@@ -255,96 +402,111 @@ export default function OpenPositionsPage() {
         <div className="p-4 border-b-2 border-[#050505] bg-[#F9FAFB] dark:bg-[#07152F] flex items-center justify-between">
           <div className="flex items-center gap-2">
             <h3 className="font-heading font-bold text-[#050505] dark:text-white text-base">
-              Daftar Transaksi Aktif
+              Daftar Posisi Berjalan
             </h3>
             <span className="text-xs text-gray-600 dark:text-gray-400 font-mono font-bold">
-              ({filteredPositions.length} posisi)
+              ({filteredPositions.length} posisi aktif)
             </span>
           </div>
           <div className="text-xs text-gray-600 dark:text-gray-400 font-medium">
-            Auto-refresh: <span className="text-[#00B843] dark:text-[#74FF44] font-bold">Live Tick</span>
+            Sinkronisasi: <span className="text-[#00B843] dark:text-[#74FF44] font-bold">Real-Time State</span>
           </div>
         </div>
 
-        {loading ? (
-          <div className="p-6 space-y-3">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton key={i} className="h-10 w-full" />
-            ))}
-          </div>
-        ) : filteredPositions.length === 0 ? (
+        {filteredPositions.length === 0 ? (
           <div className="p-12 text-center text-gray-500">
             <AlertCircle className="w-10 h-10 mx-auto mb-2 text-gray-400" />
-            <p className="font-heading font-bold text-[#050505] dark:text-white">Tidak ada posisi ditemukan</p>
-            <p className="text-xs text-gray-500 mt-1">Coba ubah kata kunci pencarian atau filter</p>
+            <p className="font-heading font-bold text-[#050505] dark:text-white">Tidak ada posisi terbuka</p>
+            <p className="text-xs text-gray-500 mt-1 mb-4">Mulai buka posisi baru untuk menguji order MT5.</p>
+            <NeoButton size="sm" onClick={handleOpenAdd}>
+              <Plus className="w-4 h-4 mr-1 inline" /> Buka Posisi Baru
+            </NeoButton>
           </div>
         ) : (
           <>
-            {/* Desktop Table View */}
+            {/* Desktop Table */}
             <div className="hidden md:block overflow-x-auto">
-              <table className="w-full neo-table">
+              <table className="w-full text-xs">
                 <thead>
-                  <tr>
-                    <th className="text-left">Ticket</th>
-                    <th className="text-left">Symbol</th>
-                    <th className="text-center">Side</th>
-                    <th className="text-right">Lots</th>
-                    <th className="text-right">Entry</th>
-                    <th className="text-right">Current</th>
-                    <th className="text-right">SL</th>
-                    <th className="text-right">TP</th>
-                    <th className="text-right">Pips</th>
-                    <th className="text-right">Swap / Comm</th>
-                    <th className="text-right">Floating P/L</th>
-                    <th className="text-center">Durasi</th>
-                    <th className="text-left">Strategi / Bot</th>
-                    <th className="text-center">Aksi</th>
+                  <tr className="border-b-2 border-[#050505] bg-gray-100 dark:bg-[#07152F] text-gray-700 dark:text-gray-300 font-heading">
+                    <th className="py-2.5 px-3 text-left">Ticket</th>
+                    <th className="py-2.5 px-3 text-left">Simbol</th>
+                    <th className="py-2.5 px-3 text-center">Tipe</th>
+                    <th className="py-2.5 px-3 text-right">Lot</th>
+                    <th className="py-2.5 px-3 text-right">Harga Entry</th>
+                    <th className="py-2.5 px-3 text-right">Harga Saat Ini</th>
+                    <th className="py-2.5 px-3 text-right">SL / TP</th>
+                    <th className="py-2.5 px-3 text-right">Floating P/L</th>
+                    <th className="py-2.5 px-3 text-left">Strategi / Robot</th>
+                    <th className="py-2.5 px-3 text-center">Aksi (CRUD)</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y-2 divide-[#050505]">
                   {filteredPositions.map((pos) => (
-                    <tr key={pos.ticket}>
-                      <td className="font-mono text-xs text-gray-600 dark:text-gray-400">#{pos.ticket}</td>
-                      <td className="font-heading font-bold text-[#050505] dark:text-white">{pos.symbol}</td>
-                      <td className="text-center">
+                    <tr
+                      key={pos.ticket}
+                      className="hover:bg-gray-50 dark:hover:bg-[#07152F]/50 transition-colors"
+                    >
+                      <td className="py-2.5 px-3 font-mono font-bold text-gray-600 dark:text-gray-400">
+                        #{pos.ticket}
+                      </td>
+                      <td className="py-2.5 px-3 font-heading font-bold text-[#050505] dark:text-white">
+                        {pos.symbol}
+                      </td>
+                      <td className="py-2.5 px-3 text-center">
                         <NeoBadge variant={pos.type === "BUY" ? "success" : "danger"}>
-                          {pos.type === "BUY" ? (
-                            <span className="flex items-center gap-1">
-                              <ArrowUpRight className="w-3 h-3" /> BUY
-                            </span>
-                          ) : (
-                            <span className="flex items-center gap-1">
-                              <ArrowDownRight className="w-3 h-3" /> SELL
-                            </span>
-                          )}
+                          {pos.type}
                         </NeoBadge>
                       </td>
-                      <td className="text-right font-mono font-bold text-[#050505] dark:text-white">{pos.lots.toFixed(2)}</td>
-                      <td className="text-right font-mono text-gray-700 dark:text-gray-300">{pos.entryPrice}</td>
-                      <td className="text-right font-mono text-[#050505] dark:text-white font-bold">{pos.currentPrice}</td>
-                      <td className="text-right font-mono text-xs text-gray-600 dark:text-gray-400">{pos.stopLoss ?? "—"}</td>
-                      <td className="text-right font-mono text-xs text-gray-600 dark:text-gray-400">{pos.takeProfit ?? "—"}</td>
-                      <td className={cn("text-right font-mono font-bold text-xs", pos.floatingPips >= 0 ? "text-[#00B843] dark:text-[#74FF44]" : "text-[#FF3B30] dark:text-[#FF4B57]")}>
-                        {pos.floatingPips >= 0 ? `+${pos.floatingPips}` : pos.floatingPips}
+                      <td className="py-2.5 px-3 text-right font-mono font-bold">
+                        {pos.lots.toFixed(2)}
                       </td>
-                      <td className="text-right font-mono text-xs text-gray-600 dark:text-gray-400">
-                        {pos.swap} / {pos.commission}
+                      <td className="py-2.5 px-3 text-right font-mono">
+                        {pos.entryPrice}
                       </td>
-                      <td className={cn("text-right font-mono font-bold text-sm", getPnLColor(pos.floatingPnL))}>
-                        {formatPnL(pos.floatingPnL)}
+                      <td className="py-2.5 px-3 text-right font-mono font-bold text-[#050505] dark:text-white">
+                        {pos.currentPrice}
                       </td>
-                      <td className="text-center text-xs text-gray-600 dark:text-gray-400 font-mono">
-                        {formatDuration(pos.duration)}
+                      <td className="py-2.5 px-3 text-right font-mono text-gray-600 dark:text-gray-400">
+                        <span className="text-[#FF4B57]">{pos.stopLoss ?? "—"}</span>
+                        {" / "}
+                        <span className="text-[#00B843] dark:text-[#74FF44]">{pos.takeProfit ?? "—"}</span>
                       </td>
-                      <td className="text-xs text-gray-700 dark:text-gray-300 max-w-[140px] truncate font-medium">{pos.strategy}</td>
-                      <td className="text-center">
-                        <button
-                          onClick={() => handleSimulatedClose(pos.ticket)}
-                          className="px-2 py-1 bg-[#FF4B57]/15 hover:bg-[#FF4B57] text-[#FF3B30] dark:text-[#FF4B57] hover:text-white border-2 border-[#050505] rounded text-[10px] font-heading font-bold transition-colors shadow-[2px_2px_0px_#050505]"
-                          title="Simulasikan Tutup Posisi"
-                        >
-                          Close
-                        </button>
+                      <td className="py-2.5 px-3 text-right font-mono font-bold">
+                        <span className={cn(getPnLColor(pos.floatingPnL))}>
+                          {formatPnL(pos.floatingPnL)}
+                        </span>
+                        <span className="text-[10px] text-gray-500 block">
+                          {pos.floatingPips >= 0 ? "+" : ""}{pos.floatingPips} pips
+                        </span>
+                      </td>
+                      <td className="py-2.5 px-3 text-gray-700 dark:text-gray-300 font-medium">
+                        {pos.strategy}
+                      </td>
+                      <td className="py-2.5 px-3 text-center">
+                        <div className="flex items-center justify-center gap-1">
+                          <button
+                            onClick={() => handleOpenEdit(pos)}
+                            title="Edit SL / TP & Lot"
+                            className="p-1 text-gray-700 dark:text-gray-300 hover:text-[#1746FF] hover:bg-gray-100 dark:hover:bg-[#07152F] border border-[#050505] rounded shadow-[1px_1px_0px_#050505]"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => setClosingPosition(pos)}
+                            title="Tutup Posisi (Market Close)"
+                            className="px-2 py-1 bg-[#FF4B57] hover:bg-[#E03E49] text-white border border-[#050505] rounded text-[10px] font-heading font-bold shadow-[1px_1px_0px_#050505]"
+                          >
+                            Tutup
+                          </button>
+                          <button
+                            onClick={() => setDeletingPosition(pos)}
+                            title="Hapus Posisi"
+                            className="p-1 text-gray-500 hover:text-[#FF4B57] hover:bg-gray-100 dark:hover:bg-[#07152F] border border-[#050505] rounded shadow-[1px_1px_0px_#050505]"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -355,13 +517,19 @@ export default function OpenPositionsPage() {
             {/* Mobile Card List View */}
             <div className="md:hidden divide-y-2 divide-[#050505] p-3 space-y-3">
               {filteredPositions.map((pos) => (
-                <div key={pos.ticket} className="p-3 bg-[#F9FAFB] dark:bg-[#07152F] border-2 border-[#050505] rounded-md space-y-2 shadow-[2px_2px_0px_#050505]">
+                <div
+                  key={pos.ticket}
+                  className="p-3 bg-[#F9FAFB] dark:bg-[#07152F] border-2 border-[#050505] rounded-md space-y-2 shadow-[2px_2px_0px_#050505]"
+                >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="font-heading font-bold text-[#050505] dark:text-white text-sm">{pos.symbol}</span>
+                      <span className="font-heading font-bold text-[#050505] dark:text-white text-sm">
+                        {pos.symbol}
+                      </span>
                       <NeoBadge variant={pos.type === "BUY" ? "success" : "danger"}>
                         {pos.type} {pos.lots}
                       </NeoBadge>
+                      <span className="text-[10px] font-mono text-gray-500">#{pos.ticket}</span>
                     </div>
                     <span className={cn("font-mono font-bold text-sm", getPnLColor(pos.floatingPnL))}>
                       {formatPnL(pos.floatingPnL)}
@@ -371,18 +539,26 @@ export default function OpenPositionsPage() {
                   <div className="grid grid-cols-2 gap-2 text-xs font-mono text-gray-700 dark:text-gray-300 pt-1 border-t-2 border-[#050505]">
                     <div>Entry: <span className="font-bold text-[#050505] dark:text-white">{pos.entryPrice}</span></div>
                     <div>Current: <span className="font-bold text-[#050505] dark:text-white">{pos.currentPrice}</span></div>
-                    <div>SL: {pos.stopLoss ?? "—"}</div>
-                    <div>TP: {pos.takeProfit ?? "—"}</div>
+                    <div>SL: <span className="text-[#FF4B57] font-bold">{pos.stopLoss ?? "—"}</span></div>
+                    <div>TP: <span className="text-[#00B843] dark:text-[#74FF44] font-bold">{pos.takeProfit ?? "—"}</span></div>
                   </div>
 
                   <div className="flex items-center justify-between text-[11px] pt-1 border-t border-gray-300 dark:border-gray-700 text-gray-600 dark:text-gray-400">
-                    <span className="truncate max-w-[180px]">{pos.strategy}</span>
-                    <button
-                      onClick={() => handleSimulatedClose(pos.ticket)}
-                      className="px-2 py-0.5 bg-[#FF4B57] text-white border border-[#050505] rounded font-bold text-[10px] shadow-[1px_1px_0px_#050505]"
-                    >
-                      Simulate Close
-                    </button>
+                    <span className="truncate max-w-[150px]">{pos.strategy}</span>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        onClick={() => handleOpenEdit(pos)}
+                        className="px-2 py-0.5 bg-white dark:bg-[#07152F] text-[#050505] dark:text-white border border-[#050505] rounded font-bold text-[10px] shadow-[1px_1px_0px_#050505]"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => setClosingPosition(pos)}
+                        className="px-2 py-0.5 bg-[#FF4B57] text-white border border-[#050505] rounded font-bold text-[10px] shadow-[1px_1px_0px_#050505]"
+                      >
+                        Tutup
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -390,6 +566,352 @@ export default function OpenPositionsPage() {
           </>
         )}
       </NeoCard>
+
+      {/* ─── MODAL 1: BUKA POSISI BARU (CREATE) ─────────────── */}
+      <NeoModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        title="Buka Posisi Trading Baru"
+        subtitle="Eksekusi order beli / jual baru pada terminal MT5"
+      >
+        <form onSubmit={handleCreateSubmit} className="space-y-4">
+          {formError && (
+            <div className="p-2.5 bg-[#FF4B57]/15 border-2 border-[#FF4B57] rounded text-xs font-bold text-[#FF4B57]">
+              {formError}
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-heading font-bold text-gray-700 dark:text-gray-300 uppercase block mb-1">
+                Simbol
+              </label>
+              <select
+                value={formSymbol}
+                onChange={(e) => handleSymbolChange(e.target.value)}
+                className="w-full text-xs p-2 bg-white dark:bg-[#07152F] border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505] font-bold"
+              >
+                <option value="XAUUSDm">XAUUSDm (Gold Cent/Mini)</option>
+                <option value="XAUUSD">XAUUSD (Gold Standard)</option>
+                <option value="EURUSD">EURUSD</option>
+                <option value="GBPUSD">GBPUSD</option>
+                <option value="USDJPY">USDJPY</option>
+                <option value="BTCUSD">BTCUSD</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="text-xs font-heading font-bold text-gray-700 dark:text-gray-300 uppercase block mb-1">
+                Arah (Order Type)
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setFormType("BUY")}
+                  className={cn(
+                    "py-1.5 text-xs font-heading font-bold rounded border-2 border-[#050505] transition-all",
+                    formType === "BUY"
+                      ? "bg-[#74FF44] text-[#050505] shadow-[2px_2px_0px_#050505]"
+                      : "bg-white dark:bg-[#07152F] text-gray-600 dark:text-gray-400"
+                  )}
+                >
+                  BUY (Long)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormType("SELL")}
+                  className={cn(
+                    "py-1.5 text-xs font-heading font-bold rounded border-2 border-[#050505] transition-all",
+                    formType === "SELL"
+                      ? "bg-[#FF4B57] text-white shadow-[2px_2px_0px_#050505]"
+                      : "bg-white dark:bg-[#07152F] text-gray-600 dark:text-gray-400"
+                  )}
+                >
+                  SELL (Short)
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-heading font-bold text-gray-700 dark:text-gray-300 uppercase block mb-1">
+                Ukuran Lot
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                min="0.01"
+                value={formLots}
+                onChange={(e) => setFormLots(e.target.value)}
+                className="w-full text-xs p-2 bg-white dark:bg-[#07152F] border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505] font-mono font-bold"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-heading font-bold text-gray-700 dark:text-gray-300 uppercase block mb-1">
+                Harga Entry
+              </label>
+              <input
+                type="number"
+                step="0.0001"
+                value={formEntryPrice}
+                onChange={(e) => setFormEntryPrice(e.target.value)}
+                className="w-full text-xs p-2 bg-white dark:bg-[#07152F] border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505] font-mono font-bold"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-heading font-bold text-gray-700 dark:text-gray-300 uppercase block mb-1">
+                Stop Loss (SL)
+              </label>
+              <input
+                type="number"
+                step="0.0001"
+                value={formStopLoss}
+                onChange={(e) => setFormStopLoss(e.target.value)}
+                placeholder="Opsional (Kosongkan jika tanpa SL)"
+                className="w-full text-xs p-2 bg-white dark:bg-[#07152F] border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505] font-mono text-[#FF4B57] font-bold"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-heading font-bold text-gray-700 dark:text-gray-300 uppercase block mb-1">
+                Take Profit (TP)
+              </label>
+              <input
+                type="number"
+                step="0.0001"
+                value={formTakeProfit}
+                onChange={(e) => setFormTakeProfit(e.target.value)}
+                placeholder="Opsional (Kosongkan jika tanpa TP)"
+                className="w-full text-xs p-2 bg-white dark:bg-[#07152F] border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505] font-mono text-[#00B843] dark:text-[#74FF44] font-bold"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-heading font-bold text-gray-700 dark:text-gray-300 uppercase block mb-1">
+              Strategi / Tag Robot
+            </label>
+            <input
+              type="text"
+              value={formStrategy}
+              onChange={(e) => setFormStrategy(e.target.value)}
+              className="w-full text-xs p-2 bg-white dark:bg-[#07152F] border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505] font-bold"
+            />
+          </div>
+
+          <div className="pt-2 flex items-center justify-end gap-2 border-t border-gray-200 dark:border-[#132D5E]">
+            <NeoButton
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsAddModalOpen(false)}
+            >
+              Batal
+            </NeoButton>
+            <NeoButton type="submit" variant="primary" size="sm">
+              Eksekusi Order ({formType})
+            </NeoButton>
+          </div>
+        </form>
+      </NeoModal>
+
+      {/* ─── MODAL 2: EDIT POSISI (UPDATE) ────────────────── */}
+      <NeoModal
+        isOpen={!!editingPosition}
+        onClose={() => setEditingPosition(null)}
+        title="Modifikasi Posisi Berjalan"
+        subtitle={`Ubah Stop Loss, Take Profit, atau Lot untuk Ticket #${editingPosition?.ticket}`}
+      >
+        <form onSubmit={handleEditSubmit} className="space-y-4">
+          <div className="p-2.5 bg-gray-100 dark:bg-[#07152F] border-2 border-[#050505] rounded text-xs font-mono flex items-center justify-between">
+            <span>{editingPosition?.symbol} ({editingPosition?.type})</span>
+            <span>Entry: ${editingPosition?.entryPrice}</span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-heading font-bold text-gray-700 dark:text-gray-300 uppercase block mb-1">
+                Stop Loss (SL)
+              </label>
+              <input
+                type="number"
+                step="0.0001"
+                value={editStopLoss}
+                onChange={(e) => setEditStopLoss(e.target.value)}
+                placeholder="Tanpa SL"
+                className="w-full text-xs p-2 bg-white dark:bg-[#07152F] border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505] font-mono text-[#FF4B57] font-bold"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-heading font-bold text-gray-700 dark:text-gray-300 uppercase block mb-1">
+                Take Profit (TP)
+              </label>
+              <input
+                type="number"
+                step="0.0001"
+                value={editTakeProfit}
+                onChange={(e) => setEditTakeProfit(e.target.value)}
+                placeholder="Tanpa TP"
+                className="w-full text-xs p-2 bg-white dark:bg-[#07152F] border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505] font-mono text-[#00B843] dark:text-[#74FF44] font-bold"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-heading font-bold text-gray-700 dark:text-gray-300 uppercase block mb-1">
+                Ukuran Lot
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                value={editLots}
+                onChange={(e) => setEditLots(e.target.value)}
+                className="w-full text-xs p-2 bg-white dark:bg-[#07152F] border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505] font-mono font-bold"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-heading font-bold text-gray-700 dark:text-gray-300 uppercase block mb-1">
+                Simulasi Harga Saat Ini
+              </label>
+              <input
+                type="number"
+                step="0.0001"
+                value={editCurrentPrice}
+                onChange={(e) => setEditCurrentPrice(e.target.value)}
+                className="w-full text-xs p-2 bg-white dark:bg-[#07152F] border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505] font-mono font-bold"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-xs font-heading font-bold text-gray-700 dark:text-gray-300 uppercase block mb-1">
+              Catatan Strategi
+            </label>
+            <input
+              type="text"
+              value={editStrategy}
+              onChange={(e) => setEditStrategy(e.target.value)}
+              className="w-full text-xs p-2 bg-white dark:bg-[#07152F] border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505] font-bold"
+            />
+          </div>
+
+          <div className="pt-2 flex items-center justify-end gap-2 border-t border-gray-200 dark:border-[#132D5E]">
+            <NeoButton
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setEditingPosition(null)}
+            >
+              Batal
+            </NeoButton>
+            <NeoButton type="submit" variant="primary" size="sm">
+              Simpan Perubahan
+            </NeoButton>
+          </div>
+        </form>
+      </NeoModal>
+
+      {/* ─── MODAL 3: TUTUP POSISI (CLOSE / REALIZE PnL) ────── */}
+      <NeoModal
+        isOpen={!!closingPosition}
+        onClose={() => setClosingPosition(null)}
+        title="Tutup Posisi (Market Close)"
+        subtitle="Posisi akan ditutup dan keuntungannya dicatat ke saldo akun"
+        maxWidth="sm"
+      >
+        <div className="space-y-4">
+          <div className="p-3 bg-gray-100 dark:bg-[#07152F] border-2 border-[#050505] rounded-md space-y-1.5">
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-600 dark:text-gray-400">Order:</span>
+              <span className="font-mono font-bold">
+                #{closingPosition?.ticket} ({closingPosition?.type} {closingPosition?.lots} Lot {closingPosition?.symbol})
+              </span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-600 dark:text-gray-400">Harga Entry:</span>
+              <span className="font-mono">{closingPosition?.entryPrice}</span>
+            </div>
+            <div className="flex justify-between text-xs">
+              <span className="text-gray-600 dark:text-gray-400">Harga Penutupan:</span>
+              <span className="font-mono font-bold text-[#050505] dark:text-white">
+                {closingPosition?.currentPrice}
+              </span>
+            </div>
+            <div className="flex justify-between text-xs pt-1 border-t border-gray-300 dark:border-gray-700">
+              <span className="font-bold">Estimasi Realized P/L:</span>
+              <span className={cn("font-mono font-bold", getPnLColor(closingPosition?.floatingPnL ?? 0))}>
+                {formatPnL(closingPosition?.floatingPnL ?? 0)}
+              </span>
+            </div>
+          </div>
+
+          <p className="text-xs text-gray-700 dark:text-gray-300">
+            Setelah ditutup, keuntungan/kerugian akan langsung ditambahkan ke Saldo Akun aktif dan masuk ke Riwayat Transaksi.
+          </p>
+
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-200 dark:border-[#132D5E]">
+            <NeoButton
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setClosingPosition(null)}
+            >
+              Batal
+            </NeoButton>
+            <NeoButton
+              type="button"
+              variant="danger"
+              size="sm"
+              onClick={handleConfirmClose}
+            >
+              Tutup Posisi Sekarang
+            </NeoButton>
+          </div>
+        </div>
+      </NeoModal>
+
+      {/* ─── MODAL 4: HAPUS POSISI (DELETE) ────────────────── */}
+      <NeoModal
+        isOpen={!!deletingPosition}
+        onClose={() => setDeletingPosition(null)}
+        title="Hapus Posisi Dari Monitor"
+        subtitle="Hapus posisi tanpa mencatat ke saldo riwayat"
+        maxWidth="sm"
+      >
+        <div className="space-y-4">
+          <p className="text-xs text-gray-700 dark:text-gray-300">
+            Apakah Anda yakin ingin menghapus data posisi <strong>#{deletingPosition?.ticket}</strong> dari dashboard?
+          </p>
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-200 dark:border-[#132D5E]">
+            <NeoButton
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setDeletingPosition(null)}
+            >
+              Batal
+            </NeoButton>
+            <NeoButton
+              type="button"
+              variant="danger"
+              size="sm"
+              onClick={handleConfirmDelete}
+            >
+              Hapus Posisi
+            </NeoButton>
+          </div>
+        </div>
+      </NeoModal>
     </div>
   );
 }
