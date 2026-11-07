@@ -10,6 +10,7 @@ const PUBLIC_PATHS = [
   "/login",
   "/api/auth/login",
   "/api/auth/logout",
+  "/api/health",
 ];
 
 export async function middleware(request: NextRequest) {
@@ -109,3 +110,4 @@ export const config = {
     "/((?!_next/static|_next/image|favicon.ico).*)",
   ],
 };
+

@@ -202,3 +202,4 @@ docker run -d -p 3000:3000 --env-file .env.production --name goldshield-app gold
 6. Dashboard akan terbuka dengan role badge `👑 SUPERADMIN`.
 
 Selesai! Aplikasi Anda siap digunakan secara aman di server produksi.
+

@@ -1,0 +1,25 @@
+services:
+  goldshield-dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: goldshield-trading-intelligence
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - AUTH_SECRET=${AUTH_SECRET:-goldshield-super-secure-production-jwt-hmac-sha256-key-2026!}
+      - SUPERADMIN_NAME=${SUPERADMIN_NAME:-Superadmin GoldShield}
+      - SUPERADMIN_EMAIL=${SUPERADMIN_EMAIL:-superadmin@goldshield.ai}
+      - SUPERADMIN_PASSWORD=${SUPERADMIN_PASSWORD:-GoldShield#Admin2026!}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@goldshield.ai}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-Admin@GoldShield2026}
+      - NEXT_PUBLIC_GATEWAY_URL=${NEXT_PUBLIC_GATEWAY_URL:-http://localhost:8000}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s

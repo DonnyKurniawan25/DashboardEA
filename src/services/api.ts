@@ -25,14 +25,28 @@
  */
 
 import * as demo from "./demo-data";
+import { useAppStore } from "@/store";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-const IS_DEMO = true; // Will be controlled by env or app state
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_GATEWAY_URL ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://localhost:8000";
+
+function isDemoMode(): boolean {
+  if (typeof window !== "undefined") {
+    try {
+      return useAppStore.getState().demoMode;
+    } catch {
+      return true;
+    }
+  }
+  return true;
+}
 
 async function fetchApi<T>(endpoint: string, fallback: () => T): Promise<T> {
-  if (IS_DEMO) {
-    // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 200 + Math.random() * 300));
+  if (isDemoMode()) {
+    // Simulate brief realistic processing delay
+    await new Promise((resolve) => setTimeout(resolve, 150 + Math.random() * 200));
     return fallback();
   }
 
@@ -50,8 +64,10 @@ async function fetchApi<T>(endpoint: string, fallback: () => T): Promise<T> {
 
     return response.json();
   } catch (error) {
-    console.error(`Failed to fetch ${endpoint}:`, error);
-    // Fallback to demo data on error
+    console.warn(
+      `Gateway live fetch failed for ${endpoint}, using reliable fallback:`,
+      error
+    );
     return fallback();
   }
 }

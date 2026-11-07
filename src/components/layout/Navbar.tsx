@@ -83,11 +83,10 @@ export default function Navbar() {
                 #{activeAccount?.accountNumber || "71024589"}
               </span>
               <span
-                className={`text-[10px] font-bold px-1.5 py-0.5 rounded border border-[#050505] ${
-                  activeAccount?.type === "real"
-                    ? "bg-[#74FF44] text-[#050505]"
-                    : "bg-[#FFE600] text-[#050505]"
-                }`}
+                className={`text-[10px] font-bold px-1.5 py-0.5 rounded border border-[#050505] ${activeAccount?.type === "real"
+                  ? "bg-[#74FF44] text-[#050505]"
+                  : "bg-[#FFE600] text-[#050505]"
+                  }`}
               >
                 {activeAccount?.broker || "Exness"} {activeAccount?.type?.toUpperCase() || "DEMO"}
               </span>
@@ -108,11 +107,10 @@ export default function Navbar() {
                       setSelectedAccount(acc.id);
                       setAccountDropdownOpen(false);
                     }}
-                    className={`w-full flex items-center justify-between p-2 rounded text-left transition-colors ${
-                      selectedAccount === acc.id
-                        ? "bg-[#E5E7EB] dark:bg-[#07152F] border border-[#1746FF] text-[#050505] dark:text-white"
-                        : "hover:bg-[#F3F4F6] dark:hover:bg-[#07152F] text-gray-700 dark:text-gray-300"
-                    }`}
+                    className={`w-full flex items-center justify-between p-2 rounded text-left transition-colors ${selectedAccount === acc.id
+                      ? "bg-[#E5E7EB] dark:bg-[#07152F] border border-[#1746FF] text-[#050505] dark:text-white"
+                      : "hover:bg-[#F3F4F6] dark:hover:bg-[#07152F] text-gray-700 dark:text-gray-300"
+                      }`}
                   >
                     <div>
                       <div className="flex items-center gap-1.5">
@@ -120,9 +118,8 @@ export default function Navbar() {
                           {acc.broker} #{acc.accountNumber}
                         </span>
                         <span
-                          className={`text-[9px] font-bold px-1 rounded border border-[#050505] ${
-                            acc.type === "real" ? "bg-[#74FF44] text-[#050505]" : "bg-[#FFE600] text-[#050505]"
-                          }`}
+                          className={`text-[9px] font-bold px-1 rounded border border-[#050505] ${acc.type === "real" ? "bg-[#74FF44] text-[#050505]" : "bg-[#FFE600] text-[#050505]"
+                            }`}
                         >
                           {acc.type.toUpperCase()}
                         </span>
