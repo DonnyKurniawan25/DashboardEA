@@ -5,8 +5,7 @@ import {
   NeoCard,
   NeoBadge,
   NeoButton,
-  NeoInput,
-  NeoSelect,
+  NeoModal,
   PageHeader,
 } from "@/components/ui";
 import { useAppStore } from "@/store";
@@ -23,18 +22,39 @@ import {
   Sliders,
   RotateCcw,
   AlertTriangle,
+  RefreshCw,
+  Server,
+  Zap,
 } from "lucide-react";
 
 export default function SettingsPage() {
-  const { demoMode, setDemoMode, accounts, selectedAccount, setSelectedAccount } = useAppStore();
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const {
+    demoMode,
+    setDemoMode,
+    accounts,
+    selectedAccount,
+    setSelectedAccount,
+    user,
+    setUser,
+    riskMetrics,
+    updateRiskMetrics,
+    resetToDemoDefaults,
+  } = useAppStore();
 
-  // Form states
-  const [maxDrawdown, setMaxDrawdown] = useState("10.0");
-  const [maxDailyLoss, setMaxDailyLoss] = useState("2500");
-  const [maxRiskPerTrade, setMaxRiskPerTrade] = useState("0.5");
-  const [maxPositions, setMaxPositions] = useState("3");
-  const [equityShield, setEquityShield] = useState(true);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+
+  // User Profile
+  const [userName, setUserName] = useState(user?.name || "Donny Kurniawan (EA-Nevan)");
+  const [userEmail, setUserEmail] = useState(user?.email || "donny@ea-nevan.trade");
+  const [gatewayUrl, setGatewayUrl] = useState("http://localhost:8000");
+
+  // Form states (Risk)
+  const [maxDrawdown, setMaxDrawdown] = useState(String(riskMetrics.maxDrawdown));
+  const [maxDailyLoss, setMaxDailyLoss] = useState(String(riskMetrics.maxDailyLossLimit));
+  const [maxRiskPerTrade, setMaxRiskPerTrade] = useState(String(riskMetrics.maxRiskPerTrade));
+  const [maxPositions, setMaxPositions] = useState(String(riskMetrics.maxOpenPositions));
+  const [equityShield, setEquityShield] = useState(riskMetrics.equityShield);
 
   // AI states
   const [minConfidence, setMinConfidence] = useState("65");
@@ -44,23 +64,37 @@ export default function SettingsPage() {
   // Notification states
   const [tgAlerts, setTgAlerts] = useState(true);
   const [soundAlerts, setSoundAlerts] = useState(true);
-  const [criticalSms, setCriticalSms] = useState(false);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3500);
+  };
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    setToastMessage("Pengaturan berhasil disimpan dan disinkronkan dengan parameter EA-Nevan!");
-    setTimeout(() => setToastMessage(null), 4000);
+    if (user) {
+      setUser({
+        ...user,
+        name: userName.trim(),
+        email: userEmail.trim(),
+      });
+    }
+
+    updateRiskMetrics({
+      maxDrawdown: parseFloat(maxDrawdown) || 10.0,
+      maxDailyLossLimit: parseFloat(maxDailyLoss) || 2500,
+      maxRiskPerTrade: parseFloat(maxRiskPerTrade) || 0.5,
+      maxOpenPositions: parseInt(maxPositions, 10) || 3,
+      equityShield,
+    });
+
+    showToast("Seluruh pengaturan dan guardrail berhasil disimpan!");
   };
 
-  const handleResetDefaults = () => {
-    setMaxDrawdown("10.0");
-    setMaxDailyLoss("2500");
-    setMaxRiskPerTrade("0.5");
-    setMaxPositions("3");
-    setMinConfidence("65");
-    setRiskProfile("MODERATE");
-    setToastMessage("Pengaturan dikembalikan ke setelan default EA-Nevan (DEMO20).");
-    setTimeout(() => setToastMessage(null), 3000);
+  const handleConfirmReset = () => {
+    resetToDemoDefaults();
+    setIsResetModalOpen(false);
+    showToast("Seluruh data akun, posisi, bot, dan riwayat berhasil di-reset ke nilai default!");
   };
 
   return (
@@ -72,16 +106,17 @@ export default function SettingsPage() {
         <NeoButton
           variant="outline"
           size="sm"
-          onClick={handleResetDefaults}
-          className="flex items-center gap-1.5"
+          onClick={() => setIsResetModalOpen(true)}
+          className="flex items-center gap-1.5 text-[#FF4B57]"
         >
-          <RotateCcw className="w-3.5 h-3.5" /> Reset Default
+          <RotateCcw className="w-3.5 h-3.5" />
+          <span>Reset Semua Data</span>
         </NeoButton>
       </PageHeader>
 
       {/* Save Notification */}
       {toastMessage && (
-        <div className="p-3 bg-[#00B843] dark:bg-[#74FF44] border-2 border-[#050505] shadow-[3px_3px_0px_#050505] text-[#050505] text-xs font-heading font-bold rounded-md flex items-center gap-2">
+        <div className="p-3 bg-[#00B843] dark:bg-[#74FF44] border-2 border-[#050505] shadow-[3px_3px_0px_#050505] text-[#050505] text-xs font-heading font-bold rounded-md flex items-center gap-2 animate-in fade-in duration-150">
           <CheckCircle2 className="w-4 h-4" />
           <span>{toastMessage}</span>
         </div>
@@ -93,19 +128,59 @@ export default function SettingsPage() {
           <div className="flex items-center gap-2 mb-4 border-b-2 border-[#050505] pb-3">
             <User className="w-5 h-5 text-[#1746FF] dark:text-[#00E5FF]" />
             <h3 className="font-heading font-bold text-[#050505] dark:text-white text-base">
-              Mode Lingkungan & Target Akun
+              Profil Pengguna & Target Akun
             </h3>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 bg-[#F9FAFB] dark:bg-[#07152F] border-2 border-[#050505] rounded-md space-y-2 shadow-[2px_2px_0px_#050505]">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div>
+              <label className="text-xs font-heading font-bold text-gray-700 dark:text-gray-300 block mb-1">
+                NAMA TRADER
+              </label>
+              <input
+                type="text"
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
+                className="w-full px-3 py-2 bg-white dark:bg-[#07152F] text-[#050505] dark:text-white text-xs font-bold border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505]"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-heading font-bold text-gray-700 dark:text-gray-300 block mb-1">
+                EMAIL LOGIN
+              </label>
+              <input
+                type="email"
+                value={userEmail}
+                onChange={(e) => setUserEmail(e.target.value)}
+                className="w-full px-3 py-2 bg-white dark:bg-[#07152F] text-[#050505] dark:text-white text-xs font-mono font-bold border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505]"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="text-xs font-heading font-bold text-gray-700 dark:text-gray-300 block mb-1">
+                FASTAPI MT5 GATEWAY
+              </label>
+              <input
+                type="text"
+                value={gatewayUrl}
+                onChange={(e) => setGatewayUrl(e.target.value)}
+                className="w-full px-3 py-2 bg-white dark:bg-[#07152F] text-[#050505] dark:text-white text-xs font-mono border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505]"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t-2 border-[#050505]">
+            <div className="p-3.5 bg-[#F9FAFB] dark:bg-[#07152F] border-2 border-[#050505] rounded-md space-y-2 shadow-[2px_2px_0px_#050505]">
               <span className="text-xs font-heading font-bold text-[#050505] dark:text-white block">
                 Mode Dashboard: {demoMode ? "DEMO SIMULASI" : "LIVE MONITORING MT5"}
               </span>
               <p className="text-[11px] text-gray-600 dark:text-gray-400">
-                Dalam mode demo, data akun simulasi dan transaksi contoh digunakan untuk uji coba strategi dan keandalan sistem tanpa risiko finansial.
+                Data simulasi memungkinkan pengujian tanpa risiko. Beralih ke Live ketika terminal MT5 terhubung.
               </p>
-              <div className="pt-2 flex items-center gap-3">
+              <div className="pt-1 flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setDemoMode(true)}
@@ -117,17 +192,17 @@ export default function SettingsPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    alert("Koneksi live MT5 memerlukan terminal MetaTrader 5 aktif dengan login valid.");
-                  }}
-                  className="px-3 py-1.5 text-xs font-heading font-bold border-2 border-[#050505] rounded bg-gray-200 dark:bg-[#0D2247] text-gray-600 dark:text-gray-400 shadow-[2px_2px_0px_#050505]"
+                  onClick={() => setDemoMode(false)}
+                  className={`px-3 py-1.5 text-xs font-heading font-bold border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505] ${
+                    !demoMode ? "bg-[#74FF44] text-[#050505]" : "bg-white dark:bg-[#0D2247] text-gray-500"
+                  }`}
                 >
-                  LIVE MT5 (Siap Terkoneksi)
+                  LIVE MONITORING
                 </button>
               </div>
             </div>
 
-            <div className="p-4 bg-[#F9FAFB] dark:bg-[#07152F] border-2 border-[#050505] rounded-md space-y-2 shadow-[2px_2px_0px_#050505]">
+            <div className="p-3.5 bg-[#F9FAFB] dark:bg-[#07152F] border-2 border-[#050505] rounded-md space-y-2 shadow-[2px_2px_0px_#050505]">
               <span className="text-xs font-heading font-bold text-[#050505] dark:text-white block">
                 Pilih Akun Utama Aktif
               </span>
@@ -141,7 +216,7 @@ export default function SettingsPage() {
               >
                 {accounts.map((acc) => (
                   <option key={acc.id} value={acc.id}>
-                    {acc.broker} #{acc.accountNumber} ({acc.type.toUpperCase()}) — {acc.currency}
+                    #{acc.accountNumber} — {acc.broker} ({acc.type.toUpperCase()}) [{acc.currency}]
                   </option>
                 ))}
               </select>
@@ -170,7 +245,7 @@ export default function SettingsPage() {
                 onChange={(e) => setMaxDrawdown(e.target.value)}
                 className="w-full px-3 py-2 bg-white dark:bg-[#07152F] text-[#050505] dark:text-white text-xs font-mono font-bold border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505]"
               />
-              <span className="text-[10px] text-gray-500 mt-1 block">Batas circuit breaker</span>
+              <span className="text-[10px] text-gray-500 mt-1 block">Batas drawdown portofolio</span>
             </div>
 
             <div>
@@ -179,12 +254,11 @@ export default function SettingsPage() {
               </label>
               <input
                 type="number"
-                step="50"
                 value={maxDailyLoss}
                 onChange={(e) => setMaxDailyLoss(e.target.value)}
                 className="w-full px-3 py-2 bg-white dark:bg-[#07152F] text-[#050505] dark:text-white text-xs font-mono font-bold border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505]"
               />
-              <span className="text-[10px] text-gray-500 mt-1 block">Hard daily cap (0.5%)</span>
+              <span className="text-[10px] text-gray-500 mt-1 block">Kerugian maksimal harian</span>
             </div>
 
             <div>
@@ -353,6 +427,47 @@ export default function SettingsPage() {
           </NeoButton>
         </div>
       </form>
+
+      {/* ─── RESET ALL DATA CONFIRMATION MODAL ────────────── */}
+      <NeoModal
+        isOpen={isResetModalOpen}
+        onClose={() => setIsResetModalOpen(false)}
+        title="Reset Seluruh Data Dashboard"
+        subtitle="Kembalikan semua akun, posisi, bot, dan riwayat ke kondisi awal"
+        maxWidth="sm"
+      >
+        <div className="space-y-4">
+          <div className="p-3 bg-[#FF4B57]/15 border-2 border-[#FF4B57] rounded text-xs text-[#FF4B57] flex items-start gap-2">
+            <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+            <span>
+              Tindakan ini akan menghapus seluruh data kustom yang baru Anda tambahkan dan memulihkan demo default EA-Nevan.
+            </span>
+          </div>
+
+          <p className="text-xs text-gray-700 dark:text-gray-300">
+            Apakah Anda yakin ingin melakukan factory reset data dashboard sekarang?
+          </p>
+
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-200 dark:border-[#132D5E]">
+            <NeoButton
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsResetModalOpen(false)}
+            >
+              Batal
+            </NeoButton>
+            <NeoButton
+              type="button"
+              variant="danger"
+              size="sm"
+              onClick={handleConfirmReset}
+            >
+              Ya, Reset Semua Data
+            </NeoButton>
+          </div>
+        </div>
+      </NeoModal>
     </div>
   );
 }

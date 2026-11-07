@@ -45,3 +45,4 @@ export async function DELETE(req: NextRequest) {
   const id = searchParams.get("id");
   return NextResponse.json({ success: true, deletedId: id });
 }
+
