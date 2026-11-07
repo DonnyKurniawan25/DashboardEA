@@ -10,6 +10,8 @@ interface StoreState extends AppState {
   setUser: (user: UserProfile | null) => void;
   login: (email: string, name?: string) => void;
   logout: () => void;
+  setTheme: (theme: "light" | "dark") => void;
+  toggleTheme: () => void;
   addExnessAccount: (account: Partial<TradingAccount> & { accountNumber: string; type: "demo" | "real" }) => void;
   getActiveAccount: () => TradingAccount | undefined;
 }
@@ -26,13 +28,37 @@ export const useAppStore = create<StoreState>((set, get) => ({
   accounts: getDemoAccounts(),
   demoMode: true,
   sidebarCollapsed: false,
-  theme: "dark",
+  theme: "light", // DEFAULT IS LIGHT
 
   setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
   toggleSidebar: () => set((state) => ({ sidebarCollapsed: !state.sidebarCollapsed })),
   setSelectedAccount: (accountId) => set({ selectedAccount: accountId }),
   setDemoMode: (demo) => set({ demoMode: demo }),
   setUser: (user) => set({ user, isAuthenticated: !!user }),
+
+  setTheme: (theme) => {
+    if (typeof document !== "undefined") {
+      if (theme === "dark") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    }
+    set({ theme });
+  },
+
+  toggleTheme: () => {
+    const current = get().theme;
+    const next = current === "light" ? "dark" : "light";
+    if (typeof document !== "undefined") {
+      if (next === "dark") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
+    }
+    set({ theme: next });
+  },
 
   login: (email, name = "Exness Trader") =>
     set({
@@ -59,19 +85,18 @@ export const useAppStore = create<StoreState>((set, get) => ({
       accountNumber: newAcc.accountNumber,
       type: newAcc.type,
       currency: newAcc.currency || "USD",
-      balance: isReal ? (newAcc.balance ?? 10000.0) : (newAcc.balance ?? 50000.0),
-      equity: isReal ? (newAcc.equity ?? 10240.5) : (newAcc.equity ?? 50820.0),
-      floatingPnL: isReal ? 240.5 : 820.0,
-      freeMargin: isReal ? 9800.0 : 48500.0,
-      marginLevel: isReal ? 2300.0 : 1850.0,
+      balance: isReal ? (newAcc.balance ?? 12500.0) : (newAcc.balance ?? 50000.0),
+      equity: isReal ? (newAcc.equity ?? 12785.4) : (newAcc.equity ?? 50820.0),
+      floatingPnL: isReal ? 285.4 : 820.0,
+      freeMargin: isReal ? 11200.0 : 48500.0,
+      marginLevel: isReal ? 2100.0 : 1850.0,
       leverage: newAcc.leverage || "1:500",
-      server: newAcc.server || (isReal ? "Exness-MT5Real" : "Exness-MT5Trial"),
+      server: newAcc.server || (isReal ? "Exness-MT5Real" : "Exness-MT5Trial7"),
       connectionStatus: "connected",
       lastSync: new Date().toISOString(),
     };
 
     set((state) => {
-      // Avoid duplicate
       const exists = state.accounts.some((a) => a.accountNumber === newAcc.accountNumber);
       const updatedAccounts = exists
         ? state.accounts.map((a) => (a.accountNumber === newAcc.accountNumber ? createdAccount : a))

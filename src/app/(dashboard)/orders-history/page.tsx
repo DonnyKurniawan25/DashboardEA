@@ -144,7 +144,7 @@ export default function OrdersHistoryPage() {
     <div className="space-y-6">
       <PageHeader
         title="Orders & History"
-        subtitle="Complete Trade Execution Log & Performance Archive"
+        subtitle="Riwayat Transaksi Lengkap, Arsip Eksekusi & Audit Trail EA-Nevan"
       >
         <NeoButton
           variant="outline"
@@ -162,74 +162,74 @@ export default function OrdersHistoryPage() {
           className="flex items-center gap-1.5"
         >
           <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
-          Sync History
+          Sinkronisasi History
         </NeoButton>
       </PageHeader>
 
       {/* KPI Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-        <NeoCard className="p-4 bg-[#0D2247]">
+        <NeoCard className="p-4">
           <div className="flex items-center justify-between mb-1">
-            <p className="text-[10px] font-heading font-bold text-gray-400 uppercase tracking-wider">
-              Total Logged Trades
+            <p className="text-[10px] font-heading font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+              Total Order Tercatat
             </p>
-            <Layers className="w-4 h-4 text-[#00E5FF]" />
+            <Layers className="w-4 h-4 text-[#1746FF] dark:text-[#00E5FF]" />
           </div>
-          <p className="text-2xl font-heading font-bold text-white">
+          <p className="text-2xl font-mono font-bold text-[#050505] dark:text-white">
             {trades.length}
           </p>
-          <p className="text-xs text-gray-400 mt-1">
-            {winTrades.length} Wins / {lossTrades.length} Losses
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 font-medium">
+            {winTrades.length} Menang / {lossTrades.length} Kalah
           </p>
         </NeoCard>
 
-        <NeoCard className="p-4 bg-[#0D2247]">
+        <NeoCard className="p-4">
           <div className="flex items-center justify-between mb-1">
-            <p className="text-[10px] font-heading font-bold text-gray-400 uppercase tracking-wider">
-              Net Realized P/L
+            <p className="text-[10px] font-heading font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+              Net Profit Realized
             </p>
-            <DollarSign className="w-4 h-4 text-[#74FF44]" />
+            <DollarSign className="w-4 h-4 text-[#00B843] dark:text-[#74FF44]" />
           </div>
-          <p className={cn("text-2xl font-heading font-bold", getPnLColor(netProfit))}>
+          <p className={cn("text-2xl font-mono font-bold", getPnLColor(netProfit))}>
             {formatPnL(netProfit)}
           </p>
-          <p className="text-xs text-gray-400 mt-1">Closed trades total</p>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 font-medium">Dari order tertutup</p>
         </NeoCard>
 
-        <NeoCard className="p-4 bg-[#0D2247]">
+        <NeoCard className="p-4">
           <div className="flex items-center justify-between mb-1">
-            <p className="text-[10px] font-heading font-bold text-gray-400 uppercase tracking-wider">
+            <p className="text-[10px] font-heading font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
               Win Rate
             </p>
-            <Target className="w-4 h-4 text-[#74FF44]" />
+            <Target className="w-4 h-4 text-[#00B843] dark:text-[#74FF44]" />
           </div>
-          <p className="text-2xl font-heading font-bold text-[#74FF44]">
+          <p className="text-2xl font-mono font-bold text-[#00B843] dark:text-[#74FF44]">
             {winRate.toFixed(1)}%
           </p>
-          <p className="text-xs text-gray-400 mt-1">Above target baseline (55%)</p>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 font-medium">Target baseline: &gt; 55%</p>
         </NeoCard>
 
-        <NeoCard className="p-4 bg-[#0D2247]">
+        <NeoCard className="p-4">
           <div className="flex items-center justify-between mb-1">
-            <p className="text-[10px] font-heading font-bold text-gray-400 uppercase tracking-wider">
+            <p className="text-[10px] font-heading font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
               Profit Factor
             </p>
-            <Percent className="w-4 h-4 text-[#00E5FF]" />
+            <Percent className="w-4 h-4 text-[#1746FF] dark:text-[#00E5FF]" />
           </div>
-          <p className="text-2xl font-heading font-bold text-white">
+          <p className="text-2xl font-mono font-bold text-[#050505] dark:text-white">
             {profitFactor}
           </p>
-          <p className="text-xs text-gray-400 mt-1">Gross Win / Gross Loss</p>
+          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 font-medium">Gross Win / Gross Loss</p>
         </NeoCard>
       </div>
 
       {/* Tabs & Search */}
-      <NeoCard className="p-4 bg-[#0D2247]">
+      <NeoCard className="p-4">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           {/* Status Tabs */}
-          <div className="flex items-center gap-1 bg-[#07152F] p-1 border-2 border-[#050505] rounded-md">
+          <div className="flex items-center gap-1 bg-[#F9FAFB] dark:bg-[#07152F] p-1 border-2 border-[#050505] rounded-md shadow-[2px_2px_0px_#050505]">
             {[
-              { id: "all", label: "All Orders" },
+              { id: "all", label: "Semua Order" },
               { id: "closed", label: "Closed" },
               { id: "pending", label: "Pending" },
               { id: "cancelled", label: "Cancelled" },
@@ -244,7 +244,7 @@ export default function OrdersHistoryPage() {
                   "px-3 py-1.5 text-xs font-heading font-bold rounded transition-colors",
                   statusFilter === tab.id
                     ? "bg-[#00E5FF] text-[#050505]"
-                    : "text-gray-400 hover:text-white"
+                    : "text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white"
                 )}
               >
                 {tab.label}
@@ -254,7 +254,7 @@ export default function OrdersHistoryPage() {
 
           {/* Search bar */}
           <div className="relative max-w-xs w-full">
-            <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" />
+            <Search className="absolute left-3 top-2.5 w-4 h-4 text-gray-500" />
             <input
               type="text"
               value={searchQuery}
@@ -262,25 +262,25 @@ export default function OrdersHistoryPage() {
                 setSearchQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              placeholder="Search by ticket, symbol, bot..."
-              className="w-full pl-9 pr-3 py-1.5 bg-[#07152F] text-white text-xs border-2 border-[#050505] shadow-[2px_2px_0px_#050505] rounded-md focus:outline-none focus:border-[#00E5FF]"
+              placeholder="Cari ticket, simbol, strategi..."
+              className="w-full pl-9 pr-3 py-1.5 bg-white dark:bg-[#07152F] text-[#050505] dark:text-white text-xs border-2 border-[#050505] shadow-[2px_2px_0px_#050505] rounded-md focus:outline-none focus:border-[#1746FF] dark:focus:border-[#00E5FF]"
             />
           </div>
         </div>
       </NeoCard>
 
       {/* Orders Table */}
-      <NeoCard className="p-0 overflow-hidden bg-[#0D2247]">
-        <div className="p-4 border-b-2 border-[#050505] flex items-center justify-between">
+      <NeoCard className="p-0 overflow-hidden">
+        <div className="p-4 border-b-2 border-[#050505] bg-[#F9FAFB] dark:bg-[#07152F] flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <h3 className="font-heading font-bold text-white text-base">
-              Order Logs
+            <h3 className="font-heading font-bold text-[#050505] dark:text-white text-base">
+              Log Eksekusi Order
             </h3>
-            <span className="text-xs text-gray-400 font-mono">
-              (Page {currentPage} of {totalPages})
+            <span className="text-xs text-gray-600 dark:text-gray-400 font-mono font-bold">
+              (Halaman {currentPage} dari {totalPages})
             </span>
           </div>
-          <NeoBadge variant="neutral">{filteredTrades.length} records</NeoBadge>
+          <NeoBadge variant="neutral">{filteredTrades.length} data order</NeoBadge>
         </div>
 
         {loading ? (
@@ -290,9 +290,9 @@ export default function OrdersHistoryPage() {
             ))}
           </div>
         ) : paginatedTrades.length === 0 ? (
-          <div className="p-12 text-center text-gray-400">
-            <p className="font-heading font-bold text-white">No historical trades found</p>
-            <p className="text-xs text-gray-500 mt-1">Try resetting the status filter</p>
+          <div className="p-12 text-center text-gray-500">
+            <p className="font-heading font-bold text-[#050505] dark:text-white">Tidak ada transaksi ditemukan</p>
+            <p className="text-xs text-gray-500 mt-1">Coba sesuaikan filter atau pencarian</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -303,42 +303,42 @@ export default function OrdersHistoryPage() {
                   <th className="text-left">Symbol</th>
                   <th className="text-center">Side</th>
                   <th className="text-right">Lots</th>
-                  <th className="text-right">Entry Price</th>
-                  <th className="text-right">Close Price</th>
+                  <th className="text-right">Harga Entry</th>
+                  <th className="text-right">Harga Tutup</th>
                   <th className="text-right">Swap / Comm</th>
                   <th className="text-right">Net Profit</th>
-                  <th className="text-left">Open Time</th>
-                  <th className="text-left">Close Time</th>
-                  <th className="text-left">Strategy / Bot</th>
+                  <th className="text-left">Waktu Buka</th>
+                  <th className="text-left">Waktu Tutup</th>
+                  <th className="text-left">Strategi / Bot</th>
                   <th className="text-center">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {paginatedTrades.map((t) => (
                   <tr key={t.ticket}>
-                    <td className="font-mono text-xs text-gray-400">#{t.ticket}</td>
-                    <td className="font-heading font-bold text-white">{t.symbol}</td>
+                    <td className="font-mono text-xs text-gray-600 dark:text-gray-400">#{t.ticket}</td>
+                    <td className="font-heading font-bold text-[#050505] dark:text-white">{t.symbol}</td>
                     <td className="text-center">
                       <NeoBadge variant={t.type === "BUY" ? "success" : "danger"}>
                         {t.type}
                       </NeoBadge>
                     </td>
-                    <td className="text-right font-mono text-gray-300">{t.lots.toFixed(2)}</td>
-                    <td className="text-right font-mono text-gray-300">{t.entryPrice.toFixed(4)}</td>
-                    <td className="text-right font-mono text-white font-bold">
+                    <td className="text-right font-mono font-bold text-[#050505] dark:text-white">{t.lots.toFixed(2)}</td>
+                    <td className="text-right font-mono text-gray-700 dark:text-gray-300">{t.entryPrice.toFixed(4)}</td>
+                    <td className="text-right font-mono text-[#050505] dark:text-white font-bold">
                       {t.closePrice ? t.closePrice.toFixed(4) : "—"}
                     </td>
-                    <td className="text-right font-mono text-xs text-gray-400">
+                    <td className="text-right font-mono text-xs text-gray-600 dark:text-gray-400">
                       {t.swap} / {t.commission}
                     </td>
-                    <td className={cn("text-right font-heading font-bold text-sm", getPnLColor(t.profit))}>
+                    <td className={cn("text-right font-mono font-bold text-sm", getPnLColor(t.profit))}>
                       {formatPnL(t.profit)}
                     </td>
-                    <td className="text-xs text-gray-400 font-mono">{formatDate(t.openTime)}</td>
-                    <td className="text-xs text-gray-400 font-mono">
-                      {t.closeTime ? formatDate(t.closeTime) : "Active"}
+                    <td className="text-xs text-gray-600 dark:text-gray-400 font-mono">{formatDate(t.openTime)}</td>
+                    <td className="text-xs text-gray-600 dark:text-gray-400 font-mono">
+                      {t.closeTime ? formatDate(t.closeTime) : "Aktif"}
                     </td>
-                    <td className="text-xs text-gray-300 max-w-[140px] truncate">{t.strategy}</td>
+                    <td className="text-xs text-gray-700 dark:text-gray-300 max-w-[140px] truncate font-medium">{t.strategy}</td>
                     <td className="text-center">
                       <NeoBadge
                         variant={
@@ -360,28 +360,28 @@ export default function OrdersHistoryPage() {
         )}
 
         {/* Pagination Footer */}
-        <div className="p-4 border-t-2 border-[#050505] flex items-center justify-between">
-          <p className="text-xs text-gray-400">
-            Showing {(currentPage - 1) * pageSize + 1} to{" "}
-            {Math.min(currentPage * pageSize, filteredTrades.length)} of{" "}
-            {filteredTrades.length} trades
+        <div className="p-4 border-t-2 border-[#050505] bg-[#F9FAFB] dark:bg-[#07152F] flex items-center justify-between">
+          <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">
+            Menampilkan {(currentPage - 1) * pageSize + 1} s/d{" "}
+            {Math.min(currentPage * pageSize, filteredTrades.length)} dari{" "}
+            {filteredTrades.length} transaksi
           </p>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1.5">
             <button
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               disabled={currentPage === 1}
-              className="p-1.5 bg-[#07152F] text-white border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#132D5E]"
+              className="p-1.5 bg-white dark:bg-[#07152F] text-[#050505] dark:text-white border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-[#132D5E]"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <span className="px-3 py-1 bg-[#07152F] text-white text-xs font-heading font-bold border-2 border-[#050505] rounded">
+            <span className="px-3 py-1 bg-white dark:bg-[#07152F] text-[#050505] dark:text-white text-xs font-mono font-bold border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505]">
               {currentPage} / {totalPages}
             </span>
             <button
               onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
               disabled={currentPage === totalPages}
-              className="p-1.5 bg-[#07152F] text-white border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-[#132D5E]"
+              className="p-1.5 bg-white dark:bg-[#07152F] text-[#050505] dark:text-white border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505] disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100 dark:hover:bg-[#132D5E]"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -391,4 +391,3 @@ export default function OrdersHistoryPage() {
     </div>
   );
 }
-

@@ -245,6 +245,6 @@ export interface AppState {
   accounts: TradingAccount[];
   demoMode: boolean;
   sidebarCollapsed: boolean;
-  theme: "dark";
+  theme: "light" | "dark";
 }
 

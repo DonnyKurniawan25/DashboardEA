@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAppStore } from "@/store";
@@ -21,11 +21,14 @@ import {
   Sparkles,
   Layers,
   HelpCircle,
+  Sun,
+  Moon,
+  Bot,
 } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, addExnessAccount } = useAppStore();
+  const { login, addExnessAccount, theme, toggleTheme } = useAppStore();
 
   const [activeTab, setActiveTab] = useState<"exness" | "platform">("exness");
 
@@ -46,6 +49,14 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [handshakeStep, setHandshakeStep] = useState<string | null>(null);
   const [errorNotice, setErrorNotice] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [theme]);
 
   // Common Exness Servers
   const demoServers = [
@@ -94,13 +105,13 @@ export default function LoginPage() {
     try {
       // Handshake animation steps
       setHandshakeStep(`Pinging ${server} Gateway...`);
-      await new Promise((r) => setTimeout(r, 600));
+      await new Promise((r) => setTimeout(r, 500));
 
       setHandshakeStep(`Mengotentikasi Akun MT5 #${accountNumber}...`);
-      await new Promise((r) => setTimeout(r, 700));
-
-      setHandshakeStep("Memverifikasi Izin Bridge & Status Margin...");
       await new Promise((r) => setTimeout(r, 600));
+
+      setHandshakeStep("Sinkronisasi EA-Nevan & Status Margin...");
+      await new Promise((r) => setTimeout(r, 500));
 
       // Add to store
       addExnessAccount({
@@ -119,7 +130,7 @@ export default function LoginPage() {
       );
 
       setHandshakeStep("Koneksi Berhasil! Mengalihkan ke Dashboard...");
-      await new Promise((r) => setTimeout(r, 500));
+      await new Promise((r) => setTimeout(r, 400));
 
       router.push("/");
     } catch {
@@ -133,7 +144,7 @@ export default function LoginPage() {
     e.preventDefault();
     setIsSubmitting(true);
     setHandshakeStep("Memverifikasi kredensial...");
-    await new Promise((r) => setTimeout(r, 800));
+    await new Promise((r) => setTimeout(r, 700));
 
     login(email, "GoldShield Admin");
     setHandshakeStep("Login Berhasil! Mengalihkan...");
@@ -142,29 +153,50 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#07152F] flex flex-col justify-center items-center p-4 sm:p-6 text-white relative overflow-hidden">
-      {/* Background Decorative Pattern */}
-      <div className="absolute inset-0 opacity-5 pointer-events-none bg-[radial-gradient(#00E5FF_1px,transparent_1px)] [background-size:24px_24px]" />
+    <div className="min-h-screen bg-[#F4F5F7] dark:bg-[#07152F] flex flex-col justify-center items-center p-4 sm:p-6 text-[#050505] dark:text-white relative overflow-hidden transition-colors duration-200">
+      {/* Background Decorative Grid Pattern */}
+      <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#1746FF_1px,transparent_1px)] dark:bg-[radial-gradient(#00E5FF_1px,transparent_1px)] [background-size:24px_24px]" />
+
+      {/* Top Controls: Theme Toggle */}
+      <div className="absolute top-4 right-4 z-20">
+        <button
+          onClick={toggleTheme}
+          className="p-2 bg-white dark:bg-[#0D2247] text-[#050505] dark:text-white border-2 border-[#050505] shadow-[3px_3px_0px_#050505] rounded-md hover:bg-gray-100 dark:hover:bg-[#132D5E] transition-all flex items-center gap-1.5"
+          title={theme === "light" ? "Ganti ke Dark Mode" : "Ganti ke Light Mode"}
+        >
+          {theme === "light" ? (
+            <>
+              <Moon className="w-4 h-4 text-[#1746FF]" />
+              <span className="text-xs font-heading font-bold">DARK MODE</span>
+            </>
+          ) : (
+            <>
+              <Sun className="w-4 h-4 text-[#FFE600]" />
+              <span className="text-xs font-heading font-bold">LIGHT MODE</span>
+            </>
+          )}
+        </button>
+      </div>
 
       {/* Main Container */}
       <div className="w-full max-w-lg z-10 space-y-6">
         {/* Brand Header */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-[#1746FF] border-3 border-[#050505] shadow-[4px_4px_0px_#050505] rounded-lg mb-2">
+          <div className="inline-flex items-center justify-center w-14 h-14 bg-[#1746FF] border-3 border-[#050505] shadow-[4px_4px_0px_#050505] rounded-lg mb-1">
             <Shield className="w-8 h-8 text-white" />
           </div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-wider">
+          <h1 className="font-heading text-2xl sm:text-3xl font-bold tracking-wider text-[#050505] dark:text-white">
             GOLDSHIELD AI
           </h1>
-          <p className="text-xs font-bold text-[#00E5FF] tracking-[0.2em] font-heading">
-            TRADING INTELLIGENCE DASHBOARD
+          <p className="text-xs font-bold text-[#1746FF] dark:text-[#00E5FF] tracking-[0.2em] font-heading">
+            TRADING INTELLIGENCE & EA-NEVAN
           </p>
         </div>
 
         {/* Neo Brutalist Card */}
-        <div className="neo-card bg-[#0D2247] p-6 sm:p-8 space-y-6">
+        <div className="neo-card bg-white dark:bg-[#0D2247] p-6 sm:p-8 space-y-6 border-3 border-[#050505] shadow-[6px_6px_0px_#050505]">
           {/* Tab Selection */}
-          <div className="grid grid-cols-2 gap-2 bg-[#07152F] p-1.5 border-2 border-[#050505] rounded-md shadow-[3px_3px_0px_#050505]">
+          <div className="grid grid-cols-2 gap-2 bg-[#F4F5F7] dark:bg-[#07152F] p-1.5 border-2 border-[#050505] rounded-md shadow-[3px_3px_0px_#050505]">
             <button
               type="button"
               onClick={() => {
@@ -173,8 +205,8 @@ export default function LoginPage() {
               }}
               className={`py-2 text-xs font-heading font-bold rounded transition-all ${
                 activeTab === "exness"
-                  ? "bg-[#00E5FF] text-[#050505] shadow-[2px_2px_0px_#050505]"
-                  : "text-gray-400 hover:text-white"
+                  ? "bg-[#00E5FF] text-[#050505] border-2 border-[#050505] shadow-[2px_2px_0px_#050505]"
+                  : "text-gray-600 dark:text-gray-400 hover:text-[#050505] dark:hover:text-white"
               }`}
             >
               ⚡ Konek Akun Exness
@@ -187,8 +219,8 @@ export default function LoginPage() {
               }}
               className={`py-2 text-xs font-heading font-bold rounded transition-all ${
                 activeTab === "platform"
-                  ? "bg-[#1746FF] text-white shadow-[2px_2px_0px_#050505]"
-                  : "text-gray-400 hover:text-white"
+                  ? "bg-[#1746FF] text-white border-2 border-[#050505] shadow-[2px_2px_0px_#050505]"
+                  : "text-gray-600 dark:text-gray-400 hover:text-[#050505] dark:hover:text-white"
               }`}
             >
               🔐 Login Platform
@@ -197,7 +229,7 @@ export default function LoginPage() {
 
           {/* Error Message */}
           {errorNotice && (
-            <div className="p-3 bg-[#FF4B57]/20 border-2 border-[#FF4B57] text-[#FF4B57] text-xs font-heading font-bold rounded-md flex items-center gap-2">
+            <div className="p-3 bg-[#FF4B57]/15 border-2 border-[#FF4B57] text-[#FF4B57] text-xs font-heading font-bold rounded-md flex items-center gap-2">
               <AlertTriangle className="w-4 h-4 shrink-0" />
               <span>{errorNotice}</span>
             </div>
@@ -205,9 +237,9 @@ export default function LoginPage() {
 
           {/* Handshake Progress Indicator */}
           {isSubmitting && handshakeStep && (
-            <div className="p-4 bg-[#07152F] border-2 border-[#00E5FF] shadow-[3px_3px_0px_#050505] rounded-md text-center space-y-2 animate-pulse">
-              <div className="w-6 h-6 border-2 border-[#00E5FF] border-t-transparent rounded-full animate-spin mx-auto" />
-              <p className="text-xs font-heading font-bold text-[#00E5FF]">
+            <div className="p-4 bg-[#F4F5F7] dark:bg-[#07152F] border-2 border-[#1746FF] dark:border-[#00E5FF] shadow-[3px_3px_0px_#050505] rounded-md text-center space-y-2 animate-pulse">
+              <div className="w-6 h-6 border-2 border-[#1746FF] dark:border-[#00E5FF] border-t-transparent rounded-full animate-spin mx-auto" />
+              <p className="text-xs font-heading font-bold text-[#1746FF] dark:text-[#00E5FF]">
                 {handshakeStep}
               </p>
             </div>
@@ -217,8 +249,8 @@ export default function LoginPage() {
           {activeTab === "exness" && !isSubmitting && (
             <form onSubmit={handleExnessSubmit} className="space-y-4">
               {/* Account Type Selector (Demo vs Real) */}
-              <div className="space-y-1">
-                <label className="text-[11px] font-heading font-bold text-gray-400 uppercase tracking-wider block">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-heading font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider block">
                   Tipe Akun Exness
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -228,7 +260,7 @@ export default function LoginPage() {
                     className={`py-2 px-3 text-xs font-heading font-bold border-2 border-[#050505] rounded-md transition-all ${
                       exnessType === "demo"
                         ? "bg-[#FFE600] text-[#050505] shadow-[3px_3px_0px_#050505]"
-                        : "bg-[#07152F] text-gray-400 hover:text-white"
+                        : "bg-[#F4F5F7] dark:bg-[#07152F] text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white"
                     }`}
                   >
                     🟡 EXNESS DEMO
@@ -239,7 +271,7 @@ export default function LoginPage() {
                     className={`py-2 px-3 text-xs font-heading font-bold border-2 border-[#050505] rounded-md transition-all ${
                       exnessType === "real"
                         ? "bg-[#74FF44] text-[#050505] shadow-[3px_3px_0px_#050505]"
-                        : "bg-[#07152F] text-gray-400 hover:text-white"
+                        : "bg-[#F4F5F7] dark:bg-[#07152F] text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white"
                     }`}
                   >
                     🟢 EXNESS REAL
@@ -248,8 +280,8 @@ export default function LoginPage() {
               </div>
 
               {/* MT5 Account Number */}
-              <div className="space-y-1">
-                <label className="text-[11px] font-heading font-bold text-gray-400 uppercase tracking-wider block">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-heading font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider block">
                   Nomor Akun MT5 Exness
                 </label>
                 <div className="relative">
@@ -259,18 +291,18 @@ export default function LoginPage() {
                     value={accountNumber}
                     onChange={(e) => setAccountNumber(e.target.value)}
                     placeholder={exnessType === "demo" ? "Contoh: 71024589" : "Nomor Akun Real Exness"}
-                    className="w-full px-3.5 py-2.5 bg-[#07152F] text-white font-mono text-sm border-2 border-[#050505] shadow-[3px_3px_0px_#050505] rounded-md focus:outline-none focus:border-[#00E5FF]"
+                    className="w-full px-3.5 py-2.5 bg-[#FFFFFF] dark:bg-[#07152F] text-[#050505] dark:text-white font-mono text-sm border-2 border-[#050505] shadow-[3px_3px_0px_#050505] rounded-md focus:outline-none focus:border-[#1746FF] dark:focus:border-[#00E5FF]"
                   />
                 </div>
               </div>
 
               {/* MT5 Password */}
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <div className="flex justify-between items-center">
-                  <label className="text-[11px] font-heading font-bold text-gray-400 uppercase tracking-wider block">
+                  <label className="text-[11px] font-heading font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider block">
                     Password MT5 (Trading / Investor)
                   </label>
-                  <span className="text-[10px] text-gray-400">Investor password didukung</span>
+                  <span className="text-[10px] text-gray-500 dark:text-gray-400">Investor didukung</span>
                 </div>
                 <div className="relative">
                   <input
@@ -278,12 +310,12 @@ export default function LoginPage() {
                     value={mt5Password}
                     onChange={(e) => setMt5Password(e.target.value)}
                     placeholder="Password Akun MT5"
-                    className="w-full px-3.5 py-2.5 bg-[#07152F] text-white font-mono text-sm border-2 border-[#050505] shadow-[3px_3px_0px_#050505] rounded-md focus:outline-none focus:border-[#00E5FF] pr-10"
+                    className="w-full px-3.5 py-2.5 bg-[#FFFFFF] dark:bg-[#07152F] text-[#050505] dark:text-white font-mono text-sm border-2 border-[#050505] shadow-[3px_3px_0px_#050505] rounded-md focus:outline-none focus:border-[#1746FF] dark:focus:border-[#00E5FF] pr-10"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-2.5 text-gray-400 hover:text-white"
+                    className="absolute right-3 top-2.5 text-gray-500 hover:text-black dark:hover:text-white"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -291,14 +323,14 @@ export default function LoginPage() {
               </div>
 
               {/* Server Selector */}
-              <div className="space-y-1">
-                <label className="text-[11px] font-heading font-bold text-gray-400 uppercase tracking-wider block">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-heading font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider block">
                   Pilih Server Exness
                 </label>
                 <select
                   value={server}
                   onChange={(e) => setServer(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-[#07152F] text-white font-mono text-sm border-2 border-[#050505] shadow-[3px_3px_0px_#050505] rounded-md focus:outline-none focus:border-[#00E5FF]"
+                  className="w-full px-3.5 py-2.5 bg-[#FFFFFF] dark:bg-[#07152F] text-[#050505] dark:text-white font-mono text-sm border-2 border-[#050505] shadow-[3px_3px_0px_#050505] rounded-md focus:outline-none focus:border-[#1746FF] dark:focus:border-[#00E5FF]"
                 >
                   {(exnessType === "demo" ? demoServers : realServers).map((srv) => (
                     <option key={srv} value={srv}>
@@ -311,13 +343,13 @@ export default function LoginPage() {
               {/* Currency & Leverage Grid */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[11px] font-heading font-bold text-gray-400 uppercase tracking-wider block">
+                  <label className="text-[11px] font-heading font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider block">
                     Mata Uang Akun
                   </label>
                   <select
                     value={currency}
                     onChange={(e) => setCurrency(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#07152F] text-white text-xs font-mono border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505]"
+                    className="w-full px-3 py-2 bg-[#FFFFFF] dark:bg-[#07152F] text-[#050505] dark:text-white text-xs font-mono border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505]"
                   >
                     <option value="USD">USD ($)</option>
                     <option value="EUR">EUR (€)</option>
@@ -327,13 +359,13 @@ export default function LoginPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[11px] font-heading font-bold text-gray-400 uppercase tracking-wider block">
+                  <label className="text-[11px] font-heading font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider block">
                     Leverage Akun
                   </label>
                   <select
                     value={leverage}
                     onChange={(e) => setLeverage(e.target.value)}
-                    className="w-full px-3 py-2 bg-[#07152F] text-white text-xs font-mono border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505]"
+                    className="w-full px-3 py-2 bg-[#FFFFFF] dark:bg-[#07152F] text-[#050505] dark:text-white text-xs font-mono border-2 border-[#050505] rounded shadow-[2px_2px_0px_#050505]"
                   >
                     <option value="1:200">1:200</option>
                     <option value="1:500">1:500 (Default)</option>
@@ -356,9 +388,9 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={handleQuickDemo}
-                className="w-full py-2 bg-[#07152F] hover:bg-[#132D5E] text-[#FFE600] border border-[#FFE600]/40 rounded text-xs font-heading font-bold flex items-center justify-center gap-1.5 transition-colors"
+                className="w-full py-2 bg-[#FFE600]/20 hover:bg-[#FFE600]/40 text-[#050505] dark:text-[#FFE600] border-2 border-[#050505] rounded text-xs font-heading font-bold flex items-center justify-center gap-1.5 transition-colors shadow-[2px_2px_0px_#050505]"
               >
-                <Zap className="w-3.5 h-3.5 text-[#FFE600]" />
+                <Zap className="w-3.5 h-3.5 text-[#1746FF] dark:text-[#FFE600]" />
                 Gunakan Contoh Akun Exness Demo (1-Click)
               </button>
             </form>
@@ -367,8 +399,8 @@ export default function LoginPage() {
           {/* FORM 2: PLATFORM ADMIN LOGIN */}
           {activeTab === "platform" && !isSubmitting && (
             <form onSubmit={handlePlatformSubmit} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-[11px] font-heading font-bold text-gray-400 uppercase tracking-wider block">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-heading font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider block">
                   Email / Username
                 </label>
                 <input
@@ -377,12 +409,12 @@ export default function LoginPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="admin@goldshield.ai"
-                  className="w-full px-3.5 py-2.5 bg-[#07152F] text-white text-sm border-2 border-[#050505] shadow-[3px_3px_0px_#050505] rounded-md focus:outline-none focus:border-[#1746FF]"
+                  className="w-full px-3.5 py-2.5 bg-[#FFFFFF] dark:bg-[#07152F] text-[#050505] dark:text-white text-sm border-2 border-[#050505] shadow-[3px_3px_0px_#050505] rounded-md focus:outline-none focus:border-[#1746FF]"
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="text-[11px] font-heading font-bold text-gray-400 uppercase tracking-wider block">
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-heading font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider block">
                   Master Password
                 </label>
                 <input
@@ -391,7 +423,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full px-3.5 py-2.5 bg-[#07152F] text-white text-sm border-2 border-[#050505] shadow-[3px_3px_0px_#050505] rounded-md focus:outline-none focus:border-[#1746FF]"
+                  className="w-full px-3.5 py-2.5 bg-[#FFFFFF] dark:bg-[#07152F] text-[#050505] dark:text-white text-sm border-2 border-[#050505] shadow-[3px_3px_0px_#050505] rounded-md focus:outline-none focus:border-[#1746FF]"
                 />
               </div>
 
@@ -404,13 +436,13 @@ export default function LoginPage() {
             </form>
           )}
 
-          {/* Security Note Footer */}
-          <div className="p-3 bg-[#07152F] border border-[#132D5E] rounded-md text-[11px] text-gray-400 space-y-1">
-            <div className="flex items-center gap-1.5 font-heading font-bold text-gray-300">
-              <Lock className="w-3.5 h-3.5 text-[#00E5FF]" /> Keamanan End-to-End MT5 Bridge
+          {/* Security & EA-Nevan Note Footer */}
+          <div className="p-3 bg-[#F4F5F7] dark:bg-[#07152F] border-2 border-[#050505] rounded-md text-[11px] text-gray-700 dark:text-gray-300 space-y-1 shadow-[2px_2px_0px_#050505]">
+            <div className="flex items-center gap-1.5 font-heading font-bold text-[#1746FF] dark:text-[#00E5FF]">
+              <Lock className="w-3.5 h-3.5" /> Keamanan End-to-End & Bridge EA-Nevan
             </div>
-            <p className="leading-relaxed">
-              Kredensial Anda dienkripsi AES-256 dan hanya digunakan untuk handshake session MT5 Bridge lokal. Password trading tidak disimpan secara terbuka di browser.
+            <p className="leading-relaxed text-[11px]">
+              Kredensial Anda dienkripsi dan diproses secara aman untuk handshake MT5 Bridge lokal. Terkoneksi otomatis dengan robot trading <strong>EA-Nevan (v1.220)</strong>.
             </p>
           </div>
         </div>
@@ -419,9 +451,9 @@ export default function LoginPage() {
         <div className="text-center">
           <Link
             href="/"
-            className="text-xs text-gray-400 hover:text-[#00E5FF] font-heading font-bold underline"
+            className="text-xs text-gray-600 dark:text-gray-400 hover:text-[#1746FF] dark:hover:text-[#00E5FF] font-heading font-bold underline"
           >
-            ← Kembali ke Dashboard (Lanjutkan sebagai Tamu Demo)
+            ← Kembali ke Dashboard (Mode Demo Langsung)
           </Link>
         </div>
       </div>

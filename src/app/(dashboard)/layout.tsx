@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Sidebar } from "@/components/layout";
 import { Navbar } from "@/components/layout";
@@ -21,11 +21,20 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { sidebarCollapsed } = useAppStore();
+  const { sidebarCollapsed, theme, setTheme } = useAppStore();
+
+  useEffect(() => {
+    // Sync theme with document class on mount & changes
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [theme]);
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="min-h-screen bg-[#07152F]">
+      <div className="min-h-screen bg-[#F4F5F7] dark:bg-[#07152F] text-[#050505] dark:text-white transition-colors duration-200">
         <Sidebar />
         <div
           className={`transition-all duration-300 ${
@@ -41,4 +50,3 @@ export default function DashboardLayout({
     </QueryClientProvider>
   );
 }
-

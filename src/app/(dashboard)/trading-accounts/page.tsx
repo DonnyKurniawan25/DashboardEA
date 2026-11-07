@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   NeoCard,
   NeoBadge,
+  NeoButton,
   PageHeader,
   Skeleton,
 } from "@/components/ui";
@@ -32,6 +34,8 @@ import {
   Wallet,
   Percent,
   Scale,
+  Plus,
+  Zap,
 } from "lucide-react";
 
 /* ────────────────────────────────
@@ -77,8 +81,8 @@ function AccountStat({
 }) {
   return (
     <div className="flex items-start gap-2">
-      <div className="w-7 h-7 bg-[#07152F] border-2 border-[#050505] shadow-[2px_2px_0px_#050505] rounded-md flex items-center justify-center shrink-0 mt-0.5">
-        <Icon className="w-3.5 h-3.5 text-[#00E5FF]" />
+      <div className="w-7 h-7 bg-[#F4F5F7] dark:bg-[#07152F] border-2 border-[#050505] shadow-[2px_2px_0px_#050505] rounded-md flex items-center justify-center shrink-0 mt-0.5">
+        <Icon className="w-3.5 h-3.5 text-[#1746FF] dark:text-[#00E5FF]" />
       </div>
       <div className="min-w-0">
         <p className="text-[10px] font-heading font-bold text-gray-500 uppercase tracking-wider leading-none mb-0.5">
@@ -86,8 +90,8 @@ function AccountStat({
         </p>
         <p
           className={cn(
-            "text-sm font-heading font-bold truncate",
-            valueClass || "text-white"
+            "text-sm font-mono font-bold truncate",
+            valueClass || "text-[#050505] dark:text-white"
           )}
         >
           {value}
@@ -106,17 +110,17 @@ function AccountCard({ account }: { account: TradingAccount }) {
   return (
     <NeoCard className="p-0 overflow-hidden" hover>
       {/* Header */}
-      <div className="p-4 pb-3 border-b-2 border-[#050505]">
+      <div className="p-4 pb-3 border-b-2 border-[#050505] bg-[#F9FAFB] dark:bg-[#07152F]">
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
             <div className="w-9 h-9 bg-[#1746FF] border-2 border-[#050505] shadow-[2px_2px_0px_#050505] rounded-md flex items-center justify-center">
               <Landmark className="w-4.5 h-4.5 text-white" />
             </div>
             <div>
-              <h3 className="font-heading font-bold text-white text-sm leading-tight">
+              <h3 className="font-heading font-bold text-[#050505] dark:text-white text-sm leading-tight">
                 {account.broker}
               </h3>
-              <p className="text-[10px] text-gray-400 font-mono">
+              <p className="text-[10px] text-gray-500 dark:text-gray-400 font-mono font-bold">
                 #{account.accountNumber}
               </p>
             </div>
@@ -142,8 +146,8 @@ function AccountCard({ account }: { account: TradingAccount }) {
           value={formatCurrency(account.equity, account.currency)}
           valueClass={
             account.equity >= account.balance
-              ? "text-[#74FF44]"
-              : "text-[#FF4B57]"
+              ? "text-[#00B843] dark:text-[#74FF44]"
+              : "text-[#FF3B30] dark:text-[#FF4B57]"
           }
         />
         <AccountStat
@@ -163,10 +167,10 @@ function AccountCard({ account }: { account: TradingAccount }) {
           value={`${formatNumber(account.marginLevel, 1)}%`}
           valueClass={
             account.marginLevel > 500
-              ? "text-[#74FF44]"
+              ? "text-[#00B843] dark:text-[#74FF44]"
               : account.marginLevel > 200
                 ? "text-[#FFE600]"
-                : "text-[#FF4B57]"
+                : "text-[#FF3B30] dark:text-[#FF4B57]"
           }
         />
         <AccountStat
@@ -177,17 +181,17 @@ function AccountCard({ account }: { account: TradingAccount }) {
       </div>
 
       {/* Footer */}
-      <div className="px-4 py-3 border-t-2 border-[#050505] bg-[#07152F]/50 flex items-center justify-between">
+      <div className="px-4 py-3 border-t-2 border-[#050505] bg-[#F9FAFB] dark:bg-[#07152F]/50 flex items-center justify-between">
         <div className="flex items-center gap-2">
           {isConnected ? (
-            <Wifi className="w-3.5 h-3.5 text-[#74FF44]" />
+            <Wifi className="w-3.5 h-3.5 text-[#00B843] dark:text-[#74FF44]" />
           ) : (
-            <WifiOff className="w-3.5 h-3.5 text-[#FF4B57]" />
+            <WifiOff className="w-3.5 h-3.5 text-[#FF3B30] dark:text-[#FF4B57]" />
           )}
           <span
             className={cn(
               "text-xs font-bold font-heading",
-              isConnected ? "text-[#74FF44]" : "text-[#FF4B57]"
+              isConnected ? "text-[#00B843] dark:text-[#74FF44]" : "text-[#FF3B30] dark:text-[#FF4B57]"
             )}
           >
             {isConnected ? "Connected" : "Disconnected"}
@@ -195,7 +199,7 @@ function AccountCard({ account }: { account: TradingAccount }) {
         </div>
         <div className="flex items-center gap-1.5">
           <Server className="w-3 h-3 text-gray-500" />
-          <span className="text-[10px] text-gray-500 font-mono truncate max-w-[120px]">
+          <span className="text-[10px] text-gray-500 dark:text-gray-400 font-mono truncate max-w-[140px] font-bold">
             {account.server}
           </span>
         </div>
@@ -219,7 +223,7 @@ export default function TradingAccountsPage() {
       const data = await api.getAccounts();
       setAccounts(data);
     } catch {
-      setError("Failed to load trading accounts.");
+      setError("Gagal memuat daftar akun trading.");
     } finally {
       setLoading(false);
     }
@@ -242,65 +246,77 @@ export default function TradingAccountsPage() {
   ).length;
 
   return (
-    <div>
+    <div className="space-y-6">
       <PageHeader
         title="Trading Accounts"
-        subtitle="Multi-Account MT5 Monitoring"
+        subtitle="Pemantauan Multi-Akun MT5 (Exness Real & Demo, Finex, ICMarkets)"
       >
-        <button
-          onClick={fetchAccounts}
-          className="neo-btn bg-[#0D2247] text-white px-3 py-2 text-sm font-heading font-bold rounded-md flex items-center gap-2"
+        <Link
+          href="/login"
+          className="neo-btn px-3 py-1.5 bg-[#00E5FF] hover:bg-[#00C8E0] text-[#050505] text-xs font-heading font-bold rounded-md flex items-center gap-1.5"
         >
-          <RefreshCw className={cn("w-4 h-4", loading && "animate-spin")} />
+          <Plus className="w-3.5 h-3.5" /> Hubungkan Akun Exness Baru
+        </Link>
+        <NeoButton
+          variant="outline"
+          size="sm"
+          onClick={fetchAccounts}
+          className="flex items-center gap-1.5"
+        >
+          <RefreshCw className={cn("w-3.5 h-3.5", loading && "animate-spin")} />
           Refresh
-        </button>
+        </NeoButton>
       </PageHeader>
 
       {/* Summary Strip */}
       {!loading && accounts.length > 0 && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-          <NeoCard className="p-3">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <NeoCard className="p-3.5">
             <p className="text-[10px] font-heading font-bold text-gray-500 uppercase tracking-wider mb-0.5">
-              Total Accounts
+              Total Akun MT5
             </p>
-            <p className="text-xl font-heading font-bold text-white">
-              {accounts.length}
+            <p className="text-xl font-heading font-bold text-[#050505] dark:text-white">
+              {accounts.length} Akun
             </p>
-            <p className="text-xs text-gray-400">
-              {connectedCount} connected
+            <p className="text-xs text-gray-500 font-medium mt-0.5">
+              {connectedCount} Terkoneksi Aktif
             </p>
           </NeoCard>
-          <NeoCard className="p-3">
+          <NeoCard className="p-3.5">
             <p className="text-[10px] font-heading font-bold text-gray-500 uppercase tracking-wider mb-0.5">
-              Combined Balance
+              Total Balance
             </p>
-            <p className="text-xl font-heading font-bold text-white">
+            <p className="text-xl font-mono font-bold text-[#050505] dark:text-white">
               {hasMixedCurrencies ? "—" : formatCurrency(totalBalance)}
             </p>
-            {hasMixedCurrencies && (
-              <p className="text-[10px] text-[#FFE600]">Mixed currencies</p>
+            {hasMixedCurrencies ? (
+              <p className="text-[10px] text-[#FFE600] font-bold">Mata Uang Berbeda</p>
+            ) : (
+              <p className="text-xs text-gray-500 font-medium mt-0.5">Saldo Tersedia</p>
             )}
           </NeoCard>
-          <NeoCard className="p-3">
+          <NeoCard className="p-3.5">
             <p className="text-[10px] font-heading font-bold text-gray-500 uppercase tracking-wider mb-0.5">
-              Combined Equity
+              Total Equity
             </p>
-            <p className="text-xl font-heading font-bold text-white">
+            <p className="text-xl font-mono font-bold text-[#050505] dark:text-white">
               {hasMixedCurrencies ? "—" : formatCurrency(totalEquity)}
             </p>
-            {hasMixedCurrencies && (
-              <p className="text-[10px] text-[#FFE600]">Mixed currencies</p>
+            {hasMixedCurrencies ? (
+              <p className="text-[10px] text-[#FFE600] font-bold">Mata Uang Berbeda</p>
+            ) : (
+              <p className="text-xs text-[#00B843] dark:text-[#74FF44] font-medium mt-0.5">Net Worth</p>
             )}
           </NeoCard>
-          <NeoCard className="p-3">
+          <NeoCard className="p-3.5">
             <p className="text-[10px] font-heading font-bold text-gray-500 uppercase tracking-wider mb-0.5">
               Total Floating P/L
             </p>
             <p
               className={cn(
-                "text-xl font-heading font-bold",
+                "text-xl font-mono font-bold",
                 hasMixedCurrencies
-                  ? "text-white"
+                  ? "text-[#050505] dark:text-white"
                   : getPnLColor(totalFloating)
               )}
             >
@@ -308,8 +324,10 @@ export default function TradingAccountsPage() {
                 ? "—"
                 : `${totalFloating >= 0 ? "+" : ""}${formatCurrency(totalFloating)}`}
             </p>
-            {hasMixedCurrencies && (
-              <p className="text-[10px] text-[#FFE600]">Mixed currencies</p>
+            {hasMixedCurrencies ? (
+              <p className="text-[10px] text-[#FFE600] font-bold">Mata Uang Berbeda</p>
+            ) : (
+              <p className="text-xs text-gray-500 font-medium mt-0.5">Posisi Berjalan</p>
             )}
           </NeoCard>
         </div>
@@ -317,17 +335,14 @@ export default function TradingAccountsPage() {
 
       {/* Mixed Currency Warning */}
       {hasMixedCurrencies && !loading && (
-        <div className="mb-6 p-3 bg-[#FFE600]/10 border-2 border-[#FFE600] shadow-[4px_4px_0px_#050505] rounded-md flex items-start gap-3">
+        <div className="p-3.5 bg-[#FFE600]/15 border-2 border-[#050505] shadow-[4px_4px_0px_#050505] rounded-md flex items-start gap-3">
           <AlertTriangle className="w-5 h-5 text-[#FFE600] shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-heading font-bold text-[#FFE600]">
-              Mixed Currency Warning
+            <p className="text-sm font-heading font-bold text-[#050505] dark:text-[#FFE600]">
+              Peringatan Mata Uang Berbeda (Mixed Currency Guard)
             </p>
-            <p className="text-xs text-gray-300 mt-0.5">
-              Your accounts use different base currencies (
-              {currencies.join(", ")}). Combined balance and equity totals
-              cannot be accurately summed across different currencies. View each
-              account individually for accurate figures.
+            <p className="text-xs text-gray-700 dark:text-gray-300 mt-0.5 leading-relaxed">
+              Akun Anda menggunakan satuan mata uang yang berbeda ({currencies.join(", ")}). Sesuai aturan fintech, saldo Standard (USD) dan Cent (USC) tidak boleh dijumlahkan secara langsung tanpa kurs konversi valid. Silakan tinjau tiap kartu akun di bawah secara individual.
             </p>
           </div>
         </div>
@@ -335,7 +350,7 @@ export default function TradingAccountsPage() {
 
       {/* Error State */}
       {error && (
-        <NeoCard variant="danger" className="p-4 mb-6">
+        <NeoCard variant="danger" className="p-4">
           <p className="font-heading font-bold text-sm">{error}</p>
         </NeoCard>
       )}
@@ -356,10 +371,10 @@ export default function TradingAccountsPage() {
       )}
 
       {/* Demo Label */}
-      <div className="mt-6 text-center">
-        <NeoBadge variant="warning">DEMO DATA</NeoBadge>
-        <p className="text-[10px] text-gray-500 mt-1">
-          Last synced: Active Simulation Stream
+      <div className="text-center pt-2">
+        <NeoBadge variant="warning">DEMO DATA STREAM</NeoBadge>
+        <p className="text-[10px] text-gray-500 mt-1 font-medium">
+          Dukungan Penuh: Exness MT5 (Trial / Real / Cent), Finex MT5, ICMarkets
         </p>
       </div>
     </div>

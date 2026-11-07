@@ -11,10 +11,10 @@ interface NeoCardProps {
   onClick?: () => void;
 }
 
-export function NeoCard({ children, className, variant = "dark", hover = false, onClick }: NeoCardProps) {
+export function NeoCard({ children, className, variant = "default", hover = false, onClick }: NeoCardProps) {
   const variants = {
-    default: "bg-white text-[#050505]",
-    dark: "bg-[#0D2247] text-white",
+    default: "bg-white dark:bg-[#0D2247] text-[#050505] dark:text-white",
+    dark: "bg-white dark:bg-[#0D2247] text-[#050505] dark:text-white",
     primary: "bg-[#1746FF] text-white",
     success: "bg-[#74FF44] text-[#050505]",
     danger: "bg-[#FF4B57] text-white",
@@ -25,7 +25,7 @@ export function NeoCard({ children, className, variant = "dark", hover = false, 
     <div
       onClick={onClick}
       className={cn(
-        "neo-card p-4",
+        "neo-card p-4 transition-colors duration-200",
         variants[variant],
         hover && "cursor-pointer hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[3px_3px_0px_#050505] transition-all duration-150",
         onClick && "cursor-pointer",
@@ -50,8 +50,8 @@ export function NeoButton({ variant = "primary", size = "md", className, childre
     success: "bg-[#74FF44] text-[#050505] hover:bg-[#60E636]",
     danger: "bg-[#FF4B57] text-white hover:bg-[#E03E49]",
     warning: "bg-[#FFE600] text-[#050505] hover:bg-[#E6CF00]",
-    outline: "bg-transparent text-white border-white hover:bg-white/10",
-    ghost: "bg-transparent text-gray-400 hover:text-white hover:bg-[#0D2247] border-transparent shadow-none",
+    outline: "bg-white dark:bg-transparent text-[#050505] dark:text-white border-[#050505] hover:bg-gray-100 dark:hover:bg-white/10",
+    ghost: "bg-transparent text-gray-600 dark:text-gray-400 hover:text-[#050505] dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#0D2247] border-transparent shadow-none",
   };
 
   const sizes = {
@@ -88,7 +88,7 @@ export function NeoBadge({ children, variant = "info", className }: NeoBadgeProp
     danger: "bg-[#FF4B57] text-white",
     warning: "bg-[#FFE600] text-[#050505]",
     info: "bg-[#00E5FF] text-[#050505]",
-    neutral: "bg-[#0D2247] text-gray-400",
+    neutral: "bg-gray-200 dark:bg-[#0D2247] text-gray-700 dark:text-gray-300",
   };
 
   return (
@@ -112,13 +112,13 @@ export function NeoInput({ label, className, ...props }: NeoInputProps) {
   return (
     <div className="flex flex-col gap-1">
       {label && (
-        <label className="text-xs font-heading font-bold text-gray-400 uppercase tracking-wider">
+        <label className="text-xs font-heading font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
           {label}
         </label>
       )}
       <input
         className={cn(
-          "px-3 py-2 bg-[#0D2247] text-white text-sm border-2 border-[#050505] shadow-[3px_3px_0px_#050505] rounded-md focus:outline-none focus:border-[#00E5FF] focus:shadow-[3px_3px_0px_#00E5FF] transition-all",
+          "px-3 py-2 bg-white dark:bg-[#0D2247] text-[#050505] dark:text-white text-sm border-2 border-[#050505] shadow-[3px_3px_0px_#050505] rounded-md focus:outline-none focus:border-[#1746FF] dark:focus:border-[#00E5FF] focus:shadow-[3px_3px_0px_#1746FF] transition-all",
           className
         )}
         {...props}
@@ -136,13 +136,13 @@ export function NeoSelect({ label, options, className, ...props }: NeoSelectProp
   return (
     <div className="flex flex-col gap-1">
       {label && (
-        <label className="text-xs font-heading font-bold text-gray-400 uppercase tracking-wider">
+        <label className="text-xs font-heading font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
           {label}
         </label>
       )}
       <select
         className={cn(
-          "px-3 py-2 bg-[#0D2247] text-white text-sm border-2 border-[#050505] shadow-[3px_3px_0px_#050505] rounded-md focus:outline-none focus:border-[#00E5FF] appearance-none cursor-pointer",
+          "px-3 py-2 bg-white dark:bg-[#0D2247] text-[#050505] dark:text-white text-sm border-2 border-[#050505] shadow-[3px_3px_0px_#050505] rounded-md focus:outline-none focus:border-[#1746FF] dark:focus:border-[#00E5FF] appearance-none cursor-pointer",
           className
         )}
         {...props}
@@ -173,9 +173,13 @@ export function PageHeader({
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
       <div>
-        <h1 className="font-heading text-2xl md:text-3xl font-bold text-white">{title}</h1>
+        <h1 className="font-heading text-2xl md:text-3xl font-bold text-[#050505] dark:text-white">
+          {title}
+        </h1>
         {subtitle && (
-          <p className="text-sm text-gray-400 mt-1">{subtitle}</p>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 font-medium">
+            {subtitle}
+          </p>
         )}
       </div>
       {children && <div className="flex items-center gap-2">{children}</div>}
@@ -193,10 +197,10 @@ export function EmptyState({
   message: string;
 }) {
   return (
-    <div className="neo-card bg-[#0D2247] p-12 flex flex-col items-center justify-center text-center">
-      <Icon className="w-12 h-12 text-gray-600 mb-4" />
-      <h3 className="font-heading text-lg font-bold text-white mb-2">{title}</h3>
-      <p className="text-sm text-gray-400 max-w-md">{message}</p>
+    <div className="neo-card p-12 flex flex-col items-center justify-center text-center">
+      <Icon className="w-12 h-12 text-gray-400 dark:text-gray-600 mb-4" />
+      <h3 className="font-heading text-lg font-bold text-[#050505] dark:text-white mb-2">{title}</h3>
+      <p className="text-sm text-gray-600 dark:text-gray-400 max-w-md">{message}</p>
     </div>
   );
 }
@@ -205,7 +209,7 @@ export function LoadingCards({ count = 4 }: { count?: number }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} className="neo-card bg-[#0D2247] p-4">
+        <div key={i} className="neo-card p-4">
           <Skeleton className="h-3 w-20 mb-3" />
           <Skeleton className="h-8 w-32 mb-2" />
           <Skeleton className="h-3 w-24" />
@@ -232,33 +236,32 @@ export function StatCard({
     <NeoCard className="p-4">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-[10px] font-heading font-bold text-gray-400 uppercase tracking-wider mb-1">
+          <p className="text-[10px] font-heading font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
             {label}
           </p>
           <p className={cn(
             "text-xl md:text-2xl font-heading font-bold animate-count",
-            variant === "success" && "text-[#74FF44]",
-            variant === "danger" && "text-[#FF4B57]",
-            variant === "default" && "text-white"
+            variant === "success" && "text-[#00B843] dark:text-[#74FF44]",
+            variant === "danger" && "text-[#FF3B30] dark:text-[#FF4B57]",
+            variant === "default" && "text-[#050505] dark:text-white"
           )}>
             {value}
           </p>
           {change && (
             <p className={cn(
-              "text-xs font-medium mt-1",
-              change.startsWith("+") ? "text-[#74FF44]" : change.startsWith("-") ? "text-[#FF4B57]" : "text-gray-400"
+              "text-xs font-medium mt-1 font-mono",
+              change.startsWith("+") ? "text-[#00B843] dark:text-[#74FF44]" : change.startsWith("-") ? "text-[#FF3B30] dark:text-[#FF4B57]" : "text-gray-500 dark:text-gray-400"
             )}>
               {change}
             </p>
           )}
         </div>
         {Icon && (
-          <div className="w-10 h-10 bg-[#07152F] border-2 border-[#050505] shadow-[2px_2px_0px_#050505] rounded-md flex items-center justify-center">
-            <Icon className="w-5 h-5 text-[#00E5FF]" />
+          <div className="w-10 h-10 bg-[#F3F4F6] dark:bg-[#07152F] border-2 border-[#050505] shadow-[2px_2px_0px_#050505] rounded-md flex items-center justify-center shrink-0">
+            <Icon className="w-5 h-5 text-[#1746FF] dark:text-[#00E5FF]" />
           </div>
         )}
       </div>
     </NeoCard>
   );
 }
-

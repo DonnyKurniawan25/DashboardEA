@@ -16,6 +16,8 @@ import {
   Check,
   LogOut,
   Zap,
+  Sun,
+  Moon,
 } from "lucide-react";
 
 export default function Navbar() {
@@ -26,6 +28,8 @@ export default function Navbar() {
     setSelectedAccount,
     user,
     logout,
+    theme,
+    toggleTheme,
   } = useAppStore();
 
   const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
@@ -35,7 +39,7 @@ export default function Navbar() {
     accounts.find((a) => a.id === selectedAccount) || accounts[0];
 
   return (
-    <header className="sticky top-0 z-30 bg-[#07152F] border-b-2 border-[#050505] px-4 md:px-6 py-3">
+    <header className="sticky top-0 z-30 bg-[#FFFFFF] dark:bg-[#07152F] border-b-2 border-[#050505] px-4 md:px-6 py-3 transition-colors duration-200">
       <div className="flex items-center justify-between gap-4">
         {/* Left: Mobile Logo & Account Selector */}
         <div className="flex items-center gap-3">
@@ -44,35 +48,37 @@ export default function Navbar() {
             <div className="w-8 h-8 bg-[#1746FF] border-2 border-[#050505] shadow-[2px_2px_0px_#050505] rounded flex items-center justify-center">
               <Shield className="w-4 h-4 text-white" />
             </div>
-            <span className="font-heading text-xs font-bold text-white">GOLDSHIELD</span>
+            <span className="font-heading text-xs font-bold text-[#050505] dark:text-white">
+              EA-NEVAN
+            </span>
           </div>
 
           {/* Account Selector Dropdown */}
           <div className="relative">
             <button
               onClick={() => setAccountDropdownOpen(!accountDropdownOpen)}
-              className="flex items-center gap-2 px-3 py-1.5 bg-[#0D2247] border-2 border-[#050505] shadow-[3px_3px_0px_#050505] rounded-md hover:bg-[#132D5E] transition-colors"
+              className="flex items-center gap-2 px-3 py-1.5 bg-[#F3F4F6] dark:bg-[#0D2247] text-[#050505] dark:text-white border-2 border-[#050505] shadow-[3px_3px_0px_#050505] rounded-md hover:bg-[#E5E7EB] dark:hover:bg-[#132D5E] transition-colors"
             >
-              <span className="text-xs font-medium text-gray-400">Akun:</span>
-              <span className="text-xs font-mono font-bold text-white">
+              <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Akun:</span>
+              <span className="text-xs font-mono font-bold">
                 #{activeAccount?.accountNumber || "71024589"}
               </span>
               <span
-                className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
+                className={`text-[10px] font-bold px-1.5 py-0.5 rounded border border-[#050505] ${
                   activeAccount?.type === "real"
-                    ? "bg-[#74FF44]/20 text-[#74FF44] border-[#74FF44]/40"
-                    : "bg-[#FFE600]/20 text-[#FFE600] border-[#FFE600]/40"
+                    ? "bg-[#74FF44] text-[#050505]"
+                    : "bg-[#FFE600] text-[#050505]"
                 }`}
               >
                 {activeAccount?.broker || "Exness"} {activeAccount?.type?.toUpperCase() || "DEMO"}
               </span>
-              <ChevronDown className="w-3 h-3 text-gray-400" />
+              <ChevronDown className="w-3 h-3 text-gray-500" />
             </button>
 
             {/* Dropdown Menu */}
             {accountDropdownOpen && (
-              <div className="absolute left-0 mt-2 w-72 bg-[#0D2247] border-2 border-[#050505] shadow-[4px_4px_0px_#050505] rounded-md p-2 z-50 space-y-1">
-                <p className="text-[10px] font-heading font-bold text-gray-400 uppercase tracking-wider px-2 py-1">
+              <div className="absolute left-0 mt-2 w-72 bg-[#FFFFFF] dark:bg-[#0D2247] border-2 border-[#050505] shadow-[4px_4px_0px_#050505] rounded-md p-2 z-50 space-y-1">
+                <p className="text-[10px] font-heading font-bold text-gray-500 uppercase tracking-wider px-2 py-1">
                   Akun MT5 Terkoneksi
                 </p>
 
@@ -85,35 +91,35 @@ export default function Navbar() {
                     }}
                     className={`w-full flex items-center justify-between p-2 rounded text-left transition-colors ${
                       selectedAccount === acc.id
-                        ? "bg-[#07152F] border border-[#00E5FF]/40 text-white"
-                        : "hover:bg-[#07152F] text-gray-300"
+                        ? "bg-[#E5E7EB] dark:bg-[#07152F] border border-[#1746FF] text-[#050505] dark:text-white"
+                        : "hover:bg-[#F3F4F6] dark:hover:bg-[#07152F] text-gray-700 dark:text-gray-300"
                     }`}
                   >
                     <div>
                       <div className="flex items-center gap-1.5">
-                        <span className="text-xs font-heading font-bold text-white">
+                        <span className="text-xs font-heading font-bold text-[#050505] dark:text-white">
                           {acc.broker} #{acc.accountNumber}
                         </span>
                         <span
-                          className={`text-[9px] font-bold px-1 rounded ${
+                          className={`text-[9px] font-bold px-1 rounded border border-[#050505] ${
                             acc.type === "real" ? "bg-[#74FF44] text-[#050505]" : "bg-[#FFE600] text-[#050505]"
                           }`}
                         >
                           {acc.type.toUpperCase()}
                         </span>
                       </div>
-                      <span className="text-[10px] text-gray-400 font-mono">
+                      <span className="text-[10px] text-gray-500 font-mono">
                         Server: {acc.server}
                       </span>
                     </div>
 
                     {selectedAccount === acc.id && (
-                      <Check className="w-4 h-4 text-[#00E5FF]" />
+                      <Check className="w-4 h-4 text-[#1746FF] dark:text-[#00E5FF]" />
                     )}
                   </button>
                 ))}
 
-                <div className="pt-2 border-t border-[#132D5E]">
+                <div className="pt-2 border-t border-gray-200 dark:border-[#132D5E]">
                   <Link
                     href="/login"
                     onClick={() => setAccountDropdownOpen(false)}
@@ -127,37 +133,53 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Center: Status Indicators */}
-        <div className="hidden lg:flex items-center gap-3">
-          {/* Broker Connection */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#0D2247] border border-[#132D5E] rounded-md">
-            {activeAccount?.type === "real" ? (
-              <Wifi className="w-3.5 h-3.5 text-[#74FF44]" />
-            ) : (
-              <Wifi className="w-3.5 h-3.5 text-[#FFE600]" />
-            )}
-            <span className="text-[10px] font-bold text-gray-300">
-              {activeAccount?.broker?.toUpperCase()}: {activeAccount?.type?.toUpperCase()}
+        {/* Center: EA-Nevan Status Telemetry */}
+        <div className="hidden lg:flex items-center gap-2.5">
+          {/* EA Core Indicator */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#F3F4F6] dark:bg-[#0D2247] border border-[#050505] rounded-md shadow-[2px_2px_0px_#050505]">
+            <Bot className="w-3.5 h-3.5 text-[#1746FF] dark:text-[#74FF44]" />
+            <span className="text-[10px] font-heading font-bold text-[#050505] dark:text-white">
+              EA-NEVAN: V1.220
+            </span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#74FF44] animate-pulse" />
+          </div>
+
+          {/* Target Symbol & TF */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#F3F4F6] dark:bg-[#0D2247] border border-[#050505] rounded-md shadow-[2px_2px_0px_#050505]">
+            <span className="text-[10px] font-mono font-bold text-[#1746FF] dark:text-[#00E5FF]">
+              XAUUSDm [M15]
             </span>
           </div>
 
-          {/* AI Engine */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#0D2247] border border-[#132D5E] rounded-md">
-            <Brain className="w-3.5 h-3.5 text-[#74FF44]" />
-            <span className="text-[10px] font-bold text-gray-400">AI ENGINE</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-[#74FF44] animate-pulse-dot" />
-          </div>
-
-          {/* EA Status */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#0D2247] border border-[#132D5E] rounded-md">
-            <Bot className="w-3.5 h-3.5 text-[#74FF44]" />
-            <span className="text-[10px] font-bold text-gray-400">EA ACTIVE</span>
-            <span className="w-1.5 h-1.5 rounded-full bg-[#74FF44] animate-pulse-dot" />
+          {/* Mode */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1 bg-[#FFE600] text-[#050505] border border-[#050505] rounded-md shadow-[2px_2px_0px_#050505]">
+            <span className="text-[10px] font-heading font-bold">
+              DEMO20 BOUNDED
+            </span>
           </div>
         </div>
 
-        {/* Right: Actions */}
+        {/* Right: Theme Toggle + Connect Exness + User */}
         <div className="flex items-center gap-2">
+          {/* THEME TOGGLE (LIGHT / DARK) */}
+          <button
+            onClick={toggleTheme}
+            className="p-1.5 bg-[#F3F4F6] dark:bg-[#0D2247] text-[#050505] dark:text-white border-2 border-[#050505] shadow-[2px_2px_0px_#050505] rounded-md hover:bg-[#E5E7EB] dark:hover:bg-[#132D5E] transition-all flex items-center gap-1"
+            title={theme === "light" ? "Ganti ke Dark Mode" : "Ganti ke Light Mode"}
+          >
+            {theme === "light" ? (
+              <>
+                <Moon className="w-4 h-4 text-[#1746FF]" />
+                <span className="text-[10px] font-heading font-bold hidden sm:inline">DARK</span>
+              </>
+            ) : (
+              <>
+                <Sun className="w-4 h-4 text-[#FFE600]" />
+                <span className="text-[10px] font-heading font-bold hidden sm:inline">LIGHT</span>
+              </>
+            )}
+          </button>
+
           {/* Quick Connect Exness Pill */}
           <Link
             href="/login"
@@ -167,71 +189,66 @@ export default function Navbar() {
             <span>Konek Exness</span>
           </Link>
 
-          {/* Demo Badge */}
-          {activeAccount?.type === "demo" && (
-            <span className="demo-badge rounded text-[10px]">DEMO MODE</span>
-          )}
-
           {/* Notifications */}
           <Link
             href="/notifications"
-            className="relative p-2 text-gray-400 hover:text-white hover:bg-[#0D2247] rounded-md transition-colors"
+            className="relative p-2 text-gray-600 dark:text-gray-400 hover:text-[#050505] dark:hover:text-white hover:bg-[#F3F4F6] dark:hover:bg-[#0D2247] rounded-md transition-colors"
           >
             <Bell className="w-5 h-5" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-[#FF4B57] rounded-full border border-[#07152F]" />
+            <span className="absolute top-1 right-1 w-2 h-2 bg-[#FF4B57] rounded-full border border-white dark:border-[#07152F]" />
           </Link>
 
           {/* User Profile Dropdown */}
           <div className="relative">
             <button
               onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-              className="flex items-center gap-2 px-2 py-1.5 hover:bg-[#0D2247] rounded-md transition-colors"
+              className="flex items-center gap-2 px-2 py-1.5 hover:bg-[#F3F4F6] dark:hover:bg-[#0D2247] rounded-md transition-colors"
             >
-              <div className="w-7 h-7 bg-[#1746FF] border-2 border-[#050505] rounded-md flex items-center justify-center">
+              <div className="w-7 h-7 bg-[#1746FF] border-2 border-[#050505] shadow-[2px_2px_0px_#050505] rounded-md flex items-center justify-center">
                 <User className="w-4 h-4 text-white" />
               </div>
-              <span className="hidden sm:block text-xs font-medium text-white">
-                {user?.name || "Trader"}
+              <span className="hidden sm:block text-xs font-heading font-bold text-[#050505] dark:text-white">
+                Donny K.
               </span>
-              <ChevronDown className="hidden sm:block w-3 h-3 text-gray-400" />
+              <ChevronDown className="hidden sm:block w-3 h-3 text-gray-500" />
             </button>
 
             {userDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-[#0D2247] border-2 border-[#050505] shadow-[4px_4px_0px_#050505] rounded-md p-2 z-50 space-y-2">
-                <div className="p-2 border-b border-[#132D5E]">
-                  <p className="text-xs font-heading font-bold text-white truncate">
-                    {user?.name || "Alex Trader"}
+              <div className="absolute right-0 mt-2 w-56 bg-[#FFFFFF] dark:bg-[#0D2247] border-2 border-[#050505] shadow-[4px_4px_0px_#050505] rounded-md p-2 z-50 space-y-2">
+                <div className="p-2 border-b border-gray-200 dark:border-[#132D5E]">
+                  <p className="text-xs font-heading font-bold text-[#050505] dark:text-white truncate">
+                    Donny Kurniawan (EA-Nevan)
                   </p>
-                  <p className="text-[10px] text-gray-400 font-mono truncate">
-                    {user?.email || "trader@goldshield.ai"}
+                  <p className="text-[10px] text-gray-500 font-mono truncate">
+                    donny@ea-nevan.trade
                   </p>
                 </div>
 
                 <Link
                   href="/login"
                   onClick={() => setUserDropdownOpen(false)}
-                  className="flex items-center gap-2 w-full p-2 text-xs text-gray-300 hover:text-white hover:bg-[#07152F] rounded transition-colors"
+                  className="flex items-center gap-2 w-full p-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-[#F3F4F6] dark:hover:bg-[#07152F] rounded transition-colors"
                 >
-                  <Plus className="w-3.5 h-3.5 text-[#00E5FF]" />
-                  <span>Koneksikan Akun Lain</span>
+                  <Plus className="w-3.5 h-3.5 text-[#1746FF] dark:text-[#00E5FF]" />
+                  <span>Koneksikan Akun Exness</span>
                 </Link>
 
                 <Link
                   href="/settings"
                   onClick={() => setUserDropdownOpen(false)}
-                  className="flex items-center gap-2 w-full p-2 text-xs text-gray-300 hover:text-white hover:bg-[#07152F] rounded transition-colors"
+                  className="flex items-center gap-2 w-full p-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-[#F3F4F6] dark:hover:bg-[#07152F] rounded transition-colors"
                 >
                   <Shield className="w-3.5 h-3.5 text-[#FFE600]" />
-                  <span>Pengaturan Risiko</span>
+                  <span>Pengaturan Guardrail</span>
                 </Link>
 
-                <div className="pt-1 border-t border-[#132D5E]">
+                <div className="pt-1 border-t border-gray-200 dark:border-[#132D5E]">
                   <button
                     onClick={() => {
                       logout();
                       setUserDropdownOpen(false);
                     }}
-                    className="flex items-center gap-2 w-full p-2 text-xs text-[#FF4B57] hover:bg-[#07152F] rounded transition-colors"
+                    className="flex items-center gap-2 w-full p-2 text-xs text-[#FF4B57] hover:bg-[#F3F4F6] dark:hover:bg-[#07152F] rounded transition-colors"
                   >
                     <LogOut className="w-3.5 h-3.5" />
                     <span>Keluar (Logout)</span>

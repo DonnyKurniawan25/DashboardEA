@@ -50,18 +50,18 @@ export default function NotificationsPage() {
 
   const markAllRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-    setToastMessage("All alerts marked as read.");
+    setToastMessage("Semua notifikasi ditandai telah dibaca.");
     setTimeout(() => setToastMessage(null), 3000);
   };
 
   const clearAll = () => {
     setNotifications([]);
-    setToastMessage("Notification center cleared.");
+    setToastMessage("Pusat notifikasi dikosongkan.");
     setTimeout(() => setToastMessage(null), 3000);
   };
 
   const sendTestTelegram = () => {
-    setToastMessage("Simulated test dispatch sent to @GoldShieldAIBot!");
+    setToastMessage("Simulasi pengiriman pesan Telegram berhasil dikirim ke bot!");
     setTimeout(() => setToastMessage(null), 4000);
   };
 
@@ -83,19 +83,19 @@ export default function NotificationsPage() {
       case "TRADE_OPENED":
       case "TRADE_CLOSED":
       case "TAKE_PROFIT":
-        return <TrendingUp className="w-5 h-5 text-[#74FF44]" />;
+        return <TrendingUp className="w-5 h-5 text-[#00B843] dark:text-[#74FF44]" />;
       case "STOP_LOSS":
-        return <XCircle className="w-5 h-5 text-[#FF4B57]" />;
+        return <XCircle className="w-5 h-5 text-[#FF3B30] dark:text-[#FF4B57]" />;
       case "AI_SIGNAL":
-        return <Brain className="w-5 h-5 text-[#00E5FF]" />;
+        return <Brain className="w-5 h-5 text-[#1746FF] dark:text-[#00E5FF]" />;
       case "HIGH_DRAWDOWN":
       case "MARGIN_ALERT":
-        return <ShieldAlert className="w-5 h-5 text-[#FF4B57]" />;
+        return <ShieldAlert className="w-5 h-5 text-[#FF3B30] dark:text-[#FF4B57]" />;
       case "EA_DISCONNECTED":
       case "API_TIMEOUT":
         return <AlertTriangle className="w-5 h-5 text-[#FFE600]" />;
       default:
-        return <Bell className="w-5 h-5 text-[#00E5FF]" />;
+        return <Bell className="w-5 h-5 text-[#1746FF] dark:text-[#00E5FF]" />;
     }
   };
 
@@ -103,7 +103,7 @@ export default function NotificationsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Notifications"
-        subtitle="Real-Time Alerts, Risk Warnings & Multi-Channel Telegram Dispatch"
+        subtitle="Pusat Peringatan Real-Time, Warning Risiko & Notifikasi Telegram EA-Nevan"
       >
         <NeoButton
           variant="outline"
@@ -111,7 +111,7 @@ export default function NotificationsPage() {
           onClick={sendTestTelegram}
           className="flex items-center gap-1.5"
         >
-          <Send className="w-3.5 h-3.5 text-[#00E5FF]" />
+          <Send className="w-3.5 h-3.5 text-[#1746FF] dark:text-[#00E5FF]" />
           Test Telegram
         </NeoButton>
         <NeoButton
@@ -121,46 +121,46 @@ export default function NotificationsPage() {
           className="flex items-center gap-1.5"
         >
           <CheckCircle2 className="w-3.5 h-3.5" />
-          Mark All Read
+          Tandai Dibaca
         </NeoButton>
       </PageHeader>
 
       {/* Toast popup */}
       {toastMessage && (
-        <div className="p-3 bg-[#1746FF] border-2 border-[#050505] shadow-[3px_3px_0px_#050505] rounded-md text-white text-xs font-heading font-bold animate-bounce">
+        <div className="p-3 bg-[#1746FF] border-2 border-[#050505] shadow-[4px_4px_0px_#050505] rounded-md text-white text-xs font-heading font-bold animate-bounce">
           {toastMessage}
         </div>
       )}
 
       {/* Telegram Bridge Integration Card */}
-      <NeoCard className="p-4 bg-[#0D2247] border-l-4 border-l-[#00E5FF]">
+      <NeoCard className="p-4 border-l-4 border-l-[#1746FF] dark:border-l-[#00E5FF]">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-[#07152F] border-2 border-[#050505] rounded-md flex items-center justify-center shrink-0">
-              <Send className="w-5 h-5 text-[#00E5FF]" />
+            <div className="w-10 h-10 bg-[#F4F5F7] dark:bg-[#07152F] border-2 border-[#050505] rounded-md flex items-center justify-center shrink-0 shadow-[2px_2px_0px_#050505]">
+              <Send className="w-5 h-5 text-[#1746FF] dark:text-[#00E5FF]" />
             </div>
             <div>
-              <h4 className="font-heading font-bold text-white text-sm">
-                Telegram Dispatch Channel: @GoldShieldAIBot
+              <h4 className="font-heading font-bold text-[#050505] dark:text-white text-sm">
+                Kanal Notifikasi Telegram: EA-Nevan Live Dispatcher
               </h4>
-              <p className="text-xs text-gray-400">
-                Automated webhook forwarder for Trade executions, Drawdown warnings, and AI signals
+              <p className="text-xs text-gray-600 dark:text-gray-400">
+                Forwarder otomatis untuk eksekusi trade MT5, alarm drawdown modal, dan konfirmasi sinyal AI
               </p>
             </div>
           </div>
-          <NeoBadge variant="info">READY FOR BACKEND</NeoBadge>
+          <NeoBadge variant="info">INTEGRASI TELEGRAM READY</NeoBadge>
         </div>
       </NeoCard>
 
       {/* Filter Tabs */}
-      <NeoCard className="p-3 bg-[#0D2247]">
+      <NeoCard className="p-3">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <div className="flex items-center gap-1 bg-[#07152F] p-1 border-2 border-[#050505] rounded-md">
+          <div className="flex items-center gap-1 bg-[#F9FAFB] dark:bg-[#07152F] p-1 border-2 border-[#050505] rounded-md shadow-[2px_2px_0px_#050505]">
             {[
-              { id: "ALL", label: "All Alerts" },
-              { id: "UNREAD", label: "Unread" },
-              { id: "ALERTS", label: "Warnings & Critical" },
-              { id: "TRADES", label: "Trade Events" },
+              { id: "ALL", label: "Semua Alert" },
+              { id: "UNREAD", label: "Belum Dibaca" },
+              { id: "ALERTS", label: "Peringatan Risiko" },
+              { id: "TRADES", label: "Aktivitas Trade" },
             ].map((t) => (
               <button
                 key={t.id}
@@ -169,7 +169,7 @@ export default function NotificationsPage() {
                   "px-3 py-1.5 text-xs font-heading font-bold rounded transition-colors",
                   filter === t.id
                     ? "bg-[#00E5FF] text-[#050505]"
-                    : "text-gray-400 hover:text-white"
+                    : "text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white"
                 )}
               >
                 {t.label}
@@ -179,15 +179,15 @@ export default function NotificationsPage() {
 
           <button
             onClick={clearAll}
-            className="text-xs text-gray-400 hover:text-[#FF4B57] flex items-center gap-1 font-heading font-bold self-end sm:self-auto"
+            className="text-xs text-gray-600 dark:text-gray-400 hover:text-[#FF3B30] dark:hover:text-[#FF4B57] flex items-center gap-1 font-heading font-bold self-end sm:self-auto"
           >
-            <Trash2 className="w-3.5 h-3.5" /> Clear All
+            <Trash2 className="w-3.5 h-3.5" /> Hapus Semua
           </button>
         </div>
       </NeoCard>
 
       {/* Notification Stream */}
-      <NeoCard className="p-0 overflow-hidden bg-[#0D2247]">
+      <NeoCard className="p-0 overflow-hidden">
         {loading ? (
           <div className="p-6 space-y-4">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -195,41 +195,41 @@ export default function NotificationsPage() {
             ))}
           </div>
         ) : filteredNotifs.length === 0 ? (
-          <div className="p-12 text-center text-gray-400">
-            <Bell className="w-10 h-10 mx-auto mb-2 text-gray-600" />
-            <p className="font-heading font-bold text-white">No notifications in this filter</p>
-            <p className="text-xs text-gray-500 mt-1">All events and system alerts are clear</p>
+          <div className="p-12 text-center text-gray-500">
+            <Bell className="w-10 h-10 mx-auto mb-2 text-gray-400" />
+            <p className="font-heading font-bold text-[#050505] dark:text-white">Tidak ada notifikasi dalam filter ini</p>
+            <p className="text-xs text-gray-500 mt-1">Semua status sistem dan transaksi normal</p>
           </div>
         ) : (
-          <div className="divide-y divide-[#132D5E]">
+          <div className="divide-y-2 divide-[#050505]">
             {filteredNotifs.map((item) => (
               <div
                 key={item.id}
                 className={cn(
                   "p-4 flex items-start gap-4 transition-colors",
-                  !item.read ? "bg-[#07152F]/70" : "hover:bg-[#07152F]/30"
+                  !item.read ? "bg-blue-50/50 dark:bg-[#07152F]/70" : "hover:bg-gray-50 dark:hover:bg-[#07152F]/30"
                 )}
               >
-                <div className="w-10 h-10 bg-[#07152F] border-2 border-[#050505] shadow-[2px_2px_0px_#050505] rounded-md flex items-center justify-center shrink-0 mt-0.5">
+                <div className="w-10 h-10 bg-white dark:bg-[#07152F] border-2 border-[#050505] shadow-[2px_2px_0px_#050505] rounded-md flex items-center justify-center shrink-0 mt-0.5">
                   {getIcon(item.type, item.severity)}
                 </div>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1">
                     <div className="flex items-center gap-2">
-                      <h4 className="font-heading font-bold text-white text-sm">
+                      <h4 className="font-heading font-bold text-[#050505] dark:text-white text-sm">
                         {item.title}
                       </h4>
                       {!item.read && (
-                        <span className="w-2 h-2 rounded-full bg-[#00E5FF]" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#1746FF] dark:bg-[#00E5FF]" />
                       )}
                     </div>
-                    <span className="text-[10px] text-gray-500 font-mono">
+                    <span className="text-[10px] text-gray-500 font-mono font-bold">
                       {formatDate(item.timestamp)}
                     </span>
                   </div>
 
-                  <p className="text-xs text-gray-300 leading-relaxed">
+                  <p className="text-xs text-gray-700 dark:text-gray-300 leading-relaxed font-medium">
                     {item.message}
                   </p>
 
@@ -257,4 +257,3 @@ export default function NotificationsPage() {
     </div>
   );
 }
-

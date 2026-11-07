@@ -27,6 +27,8 @@ import {
   WifiOff,
   Heart,
   Timer,
+  Layers,
+  ChevronRight,
 } from 'lucide-react';
 import {
   AreaChart,
@@ -78,10 +80,10 @@ import type { Activity as ActivityType } from '@/services/demo-data';
 function EquityTooltip({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number; dataKey: string; color: string }>; label?: string }) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="bg-[#0D2247] border-2 border-[#050505] shadow-[4px_4px_0px_#050505] rounded-md p-3 text-xs">
-      <p className="font-heading font-bold text-white mb-2">{label}</p>
+    <div className="bg-white dark:bg-[#0D2247] border-2 border-[#050505] shadow-[4px_4px_0px_#050505] rounded-md p-3 text-xs">
+      <p className="font-heading font-bold text-[#050505] dark:text-white mb-2">{label}</p>
       {payload.map((entry) => (
-        <p key={entry.dataKey} style={{ color: entry.color }} className="font-medium">
+        <p key={entry.dataKey} style={{ color: entry.color }} className="font-mono font-bold">
           {entry.dataKey === 'drawdown'
             ? `Drawdown: ${entry.value.toFixed(2)}%`
             : `${entry.dataKey}: ${formatCurrency(entry.value)}`}
@@ -95,9 +97,9 @@ function DailyPnLTooltip({ active, payload, label }: { active?: boolean; payload
   if (!active || !payload?.length) return null;
   const value = payload[0].value;
   return (
-    <div className="bg-[#0D2247] border-2 border-[#050505] shadow-[4px_4px_0px_#050505] rounded-md p-3 text-xs">
-      <p className="font-heading font-bold text-white mb-1">{label}</p>
-      <p className={cn('font-bold', value >= 0 ? 'text-[#74FF44]' : 'text-[#FF4B57]')}>
+    <div className="bg-white dark:bg-[#0D2247] border-2 border-[#050505] shadow-[4px_4px_0px_#050505] rounded-md p-3 text-xs">
+      <p className="font-heading font-bold text-[#050505] dark:text-white mb-1">{label}</p>
+      <p className={cn('font-mono font-bold', value >= 0 ? 'text-[#00B843] dark:text-[#74FF44]' : 'text-[#FF3B30] dark:text-[#FF4B57]')}>
         {formatPnL(value)}
       </p>
     </div>
@@ -183,7 +185,7 @@ export default function DashboardPage() {
       <div className="space-y-6">
         <PageHeader
           title="Dashboard"
-          subtitle="GoldShield AI Trading Intelligence"
+          subtitle="GoldShield AI & EA-Nevan Trading Intelligence"
         />
         <LoadingCards count={10} />
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -207,10 +209,10 @@ export default function DashboardPage() {
       {/* ==================== PAGE HEADER ==================== */}
       <PageHeader
         title="Dashboard"
-        subtitle="GoldShield AI Trading Intelligence — DEMO DATA"
+        subtitle="GoldShield AI & EA-Nevan Trading Intelligence — EXNESS MT5"
       >
         <NeoButton
-          variant="ghost"
+          variant="outline"
           size="sm"
           onClick={() => {
             setLoading(true);
@@ -222,7 +224,7 @@ export default function DashboardPage() {
           <RefreshCw className="w-4 h-4" />
           Refresh
         </NeoButton>
-        <NeoBadge variant="warning">DEMO MODE</NeoBadge>
+        <NeoBadge variant="warning">DEMO DATA</NeoBadge>
       </PageHeader>
 
       {/* ==================== KPI CARDS ==================== */}
@@ -283,7 +285,7 @@ export default function DashboardPage() {
           value={`${runningBots} RUNNING`}
           icon={Bot}
           variant="success"
-          change={`${bots?.length ?? 0} total bots`}
+          change="EA-Nevan v1.220"
         />
       </div>
 
@@ -293,15 +295,19 @@ export default function DashboardPage() {
         <NeoCard className="lg:col-span-2 p-4 md:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <div>
-              <h2 className="font-heading text-lg font-bold text-white">Equity Growth</h2>
-              <p className="text-xs text-gray-400 mt-0.5">Balance, Equity & Drawdown over time</p>
+              <h2 className="font-heading text-lg font-bold text-[#050505] dark:text-white">
+                Pertumbuhan Equity & Balance
+              </h2>
+              <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+                Balance, Equity & Drawdown historis robot EA-Nevan
+              </p>
             </div>
             <div className="flex flex-wrap gap-1">
               {periods.map((p) => (
                 <NeoButton
                   key={p}
                   size="sm"
-                  variant={chartPeriod === p ? 'primary' : 'ghost'}
+                  variant={chartPeriod === p ? 'primary' : 'outline'}
                   onClick={() => setChartPeriod(p)}
                   className="!px-2.5 !py-1 text-[11px]"
                 >
@@ -317,19 +323,19 @@ export default function DashboardPage() {
                   <defs>
                     <linearGradient id="gradBalance" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#1746FF" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#1746FF" stopOpacity={0} />
+                      <stop offset="95%" stopColor="#1746FF" stopOpacity={0.02} />
                     </linearGradient>
                     <linearGradient id="gradEquity" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#00E5FF" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#00E5FF" stopOpacity={0} />
+                      <stop offset="95%" stopColor="#00E5FF" stopOpacity={0.02} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1a3a5c" vertical={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
                   <XAxis
                     dataKey="date"
                     tick={{ fill: '#6b7280', fontSize: 10 }}
                     tickLine={false}
-                    axisLine={{ stroke: '#1a3a5c' }}
+                    axisLine={{ stroke: '#050505' }}
                     tickFormatter={(val) => {
                       const d = new Date(val);
                       return `${d.getMonth() + 1}/${d.getDate()}`;
@@ -358,14 +364,14 @@ export default function DashboardPage() {
                     verticalAlign="top"
                     height={30}
                     iconType="square"
-                    wrapperStyle={{ fontSize: 11, color: '#9ca3af' }}
+                    wrapperStyle={{ fontSize: 11, color: '#4b5563' }}
                   />
                   <Area
                     yAxisId="equity"
                     type="monotone"
                     dataKey="balance"
                     stroke="#1746FF"
-                    strokeWidth={2}
+                    strokeWidth={2.5}
                     fill="url(#gradBalance)"
                     dot={false}
                     name="Balance"
@@ -375,7 +381,7 @@ export default function DashboardPage() {
                     type="monotone"
                     dataKey="equity"
                     stroke="#00E5FF"
-                    strokeWidth={2}
+                    strokeWidth={2.5}
                     fill="url(#gradEquity)"
                     dot={false}
                     name="Equity"
@@ -402,19 +408,21 @@ export default function DashboardPage() {
         {/* Daily P/L Chart */}
         <NeoCard className="p-4 md:p-6">
           <div className="mb-4">
-            <h2 className="font-heading text-lg font-bold text-white">Daily P/L</h2>
-            <p className="text-xs text-gray-400 mt-0.5">Last 14 days performance</p>
+            <h2 className="font-heading text-lg font-bold text-[#050505] dark:text-white">
+              Daily Profit / Loss
+            </h2>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">Performa 14 hari terakhir</p>
           </div>
           <div className="h-[300px] md:h-[340px]">
             {last7DailyPnL.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={last7DailyPnL} margin={{ top: 5, right: 5, left: -15, bottom: 0 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1a3a5c" vertical={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" vertical={false} />
                   <XAxis
                     dataKey="date"
                     tick={{ fill: '#6b7280', fontSize: 10 }}
                     tickLine={false}
-                    axisLine={{ stroke: '#1a3a5c' }}
+                    axisLine={{ stroke: '#050505' }}
                     tickFormatter={(val) => {
                       const d = new Date(val);
                       return `${d.getMonth() + 1}/${d.getDate()}`;
@@ -437,7 +445,9 @@ export default function DashboardPage() {
                     {last7DailyPnL.map((entry, index) => (
                       <rect
                         key={`bar-${index}`}
-                        fill={entry.pnl >= 0 ? '#74FF44' : '#FF4B57'}
+                        fill={entry.pnl >= 0 ? '#00B843' : '#FF4B57'}
+                        stroke="#050505"
+                        strokeWidth={1.5}
                       />
                     ))}
                   </Bar>
@@ -454,19 +464,23 @@ export default function DashboardPage() {
       <NeoCard className="p-4 md:p-6">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="font-heading text-lg font-bold text-white">Open Positions</h2>
-            <p className="text-xs text-gray-400 mt-0.5">{positions?.length ?? 0} active positions</p>
+            <h2 className="font-heading text-lg font-bold text-[#050505] dark:text-white">
+              Posisi Terbuka (Live MT5 Positions)
+            </h2>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+              {positions?.length ?? 0} transaksi aktif di Exness MT5
+            </p>
           </div>
-          <NeoBadge variant="info">{positions?.length ?? 0} Open</NeoBadge>
+          <NeoBadge variant="info">{positions?.length ?? 0} Terbuka</NeoBadge>
         </div>
         <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
-          <table className="w-full min-w-[900px] text-sm">
+          <table className="neo-table w-full min-w-[900px] text-sm border-collapse">
             <thead>
-              <tr className="border-b-2 border-[#1a3a5c]">
-                {['Ticket', 'Symbol', 'Type', 'Lots', 'Entry', 'Current', 'SL', 'TP', 'P/L', 'Duration', 'Strategy'].map((h) => (
+              <tr>
+                {['Ticket', 'Symbol', 'Type', 'Lots', 'Entry', 'Current', 'SL', 'TP', 'P/L ($)', 'Durasi', 'Strategi / Bot'].map((h) => (
                   <th
                     key={h}
-                    className="text-[10px] font-heading font-bold text-gray-500 uppercase tracking-wider py-3 px-2 text-left"
+                    className="py-3 px-3 text-left"
                   >
                     {h}
                   </th>
@@ -477,11 +491,11 @@ export default function DashboardPage() {
               {positions?.map((pos) => (
                 <tr
                   key={pos.ticket}
-                  className="border-b border-[#1a3a5c]/50 hover:bg-[#0a1e3d] transition-colors"
+                  className="transition-colors"
                 >
-                  <td className="py-3 px-2 font-mono text-xs text-gray-400">#{pos.ticket}</td>
-                  <td className="py-3 px-2 font-heading font-bold text-white">{pos.symbol}</td>
-                  <td className="py-3 px-2">
+                  <td className="py-3 px-3 font-mono text-xs text-gray-600 dark:text-gray-400">#{pos.ticket}</td>
+                  <td className="py-3 px-3 font-heading font-bold text-[#050505] dark:text-white">{pos.symbol}</td>
+                  <td className="py-3 px-3">
                     <NeoBadge variant={pos.type === 'BUY' ? 'success' : 'danger'}>
                       {pos.type === 'BUY' ? (
                         <span className="flex items-center gap-1"><ArrowUpRight className="w-3 h-3" />{pos.type}</span>
@@ -490,16 +504,16 @@ export default function DashboardPage() {
                       )}
                     </NeoBadge>
                   </td>
-                  <td className="py-3 px-2 font-mono text-white">{pos.lots.toFixed(2)}</td>
-                  <td className="py-3 px-2 font-mono text-gray-300">{pos.entryPrice}</td>
-                  <td className="py-3 px-2 font-mono text-white">{pos.currentPrice}</td>
-                  <td className="py-3 px-2 font-mono text-gray-400">{pos.stopLoss ?? '—'}</td>
-                  <td className="py-3 px-2 font-mono text-gray-400">{pos.takeProfit ?? '—'}</td>
-                  <td className={cn('py-3 px-2 font-heading font-bold', getPnLColor(pos.floatingPnL))}>
+                  <td className="py-3 px-3 font-mono font-bold text-[#050505] dark:text-white">{pos.lots.toFixed(2)}</td>
+                  <td className="py-3 px-3 font-mono text-gray-700 dark:text-gray-300">{pos.entryPrice}</td>
+                  <td className="py-3 px-3 font-mono font-bold text-[#050505] dark:text-white">{pos.currentPrice}</td>
+                  <td className="py-3 px-3 font-mono text-gray-600 dark:text-gray-400">{pos.stopLoss ?? '—'}</td>
+                  <td className="py-3 px-3 font-mono text-gray-600 dark:text-gray-400">{pos.takeProfit ?? '—'}</td>
+                  <td className={cn('py-3 px-3 font-mono font-bold', getPnLColor(pos.floatingPnL))}>
                     {formatPnL(pos.floatingPnL)}
                   </td>
-                  <td className="py-3 px-2 text-gray-400 text-xs">{formatDuration(pos.duration)}</td>
-                  <td className="py-3 px-2 text-xs text-gray-400 max-w-[140px] truncate">{pos.strategy}</td>
+                  <td className="py-3 px-3 text-gray-600 dark:text-gray-400 text-xs">{formatDuration(pos.duration)}</td>
+                  <td className="py-3 px-3 text-xs font-medium text-gray-700 dark:text-gray-300 max-w-[140px] truncate">{pos.strategy}</td>
                 </tr>
               ))}
             </tbody>
@@ -513,16 +527,18 @@ export default function DashboardPage() {
         <NeoCard className="p-4 md:p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Brain className="w-5 h-5 text-[#00E5FF]" />
-              <h2 className="font-heading text-lg font-bold text-white">AI Signals</h2>
+              <Brain className="w-5 h-5 text-[#1746FF] dark:text-[#00E5FF]" />
+              <h2 className="font-heading text-lg font-bold text-[#050505] dark:text-white">
+                Sinyal AI & Aturan EA
+              </h2>
             </div>
-            <NeoBadge variant="info">{signals?.filter((s) => s.status === 'active').length ?? 0} Active</NeoBadge>
+            <NeoBadge variant="info">{signals?.filter((s) => s.status === 'active').length ?? 0} Aktif</NeoBadge>
           </div>
           <div className="space-y-3">
             {signals?.map((sig) => (
               <div
                 key={sig.id}
-                className="flex items-start gap-3 p-3 bg-[#07152F] border-2 border-[#1a3a5c] rounded-md hover:border-[#00E5FF]/40 transition-colors"
+                className="flex items-start gap-3 p-3.5 bg-[#F9FAFB] dark:bg-[#07152F] border-2 border-[#050505] shadow-[3px_3px_0px_#050505] rounded-md transition-all"
               >
                 <div className="flex-shrink-0 mt-0.5">
                   <NeoBadge
@@ -539,8 +555,8 @@ export default function DashboardPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="font-heading font-bold text-white text-sm">{sig.symbol}</span>
-                    <span className="text-[10px] text-gray-500 font-mono">{sig.timeframe}</span>
+                    <span className="font-heading font-bold text-[#050505] dark:text-white text-sm">{sig.symbol}</span>
+                    <span className="text-[10px] text-gray-600 dark:text-gray-400 font-mono font-bold">{sig.timeframe}</span>
                     <NeoBadge
                       variant={
                         sig.trend === 'BULLISH'
@@ -555,12 +571,12 @@ export default function DashboardPage() {
                   </div>
                   {/* Confidence Bar */}
                   <div className="flex items-center gap-2 mb-1.5">
-                    <div className="flex-1 h-2 bg-[#0D2247] border border-[#1a3a5c] rounded-sm overflow-hidden">
+                    <div className="flex-1 h-2.5 bg-[#E5E7EB] dark:bg-[#0D2247] border border-[#050505] rounded-sm overflow-hidden">
                       <div
                         className={cn(
                           'h-full rounded-sm transition-all duration-500',
                           sig.confidence >= 75
-                            ? 'bg-[#74FF44]'
+                            ? 'bg-[#00B843] dark:bg-[#74FF44]'
                             : sig.confidence >= 60
                             ? 'bg-[#FFE600]'
                             : 'bg-[#FF4B57]'
@@ -568,12 +584,12 @@ export default function DashboardPage() {
                         style={{ width: `${sig.confidence}%` }}
                       />
                     </div>
-                    <span className="text-xs font-heading font-bold text-white w-9 text-right">
+                    <span className="text-xs font-mono font-bold text-[#050505] dark:text-white w-9 text-right">
                       {sig.confidence}%
                     </span>
                   </div>
-                  <p className="text-xs text-gray-400 line-clamp-1">{sig.reason}</p>
-                  <p className="text-[10px] text-gray-600 mt-1">
+                  <p className="text-xs text-gray-700 dark:text-gray-300 font-medium line-clamp-1">{sig.reason}</p>
+                  <p className="text-[10px] text-gray-500 font-mono mt-1">
                     {new Date(sig.timestamp).toLocaleTimeString()}
                   </p>
                 </div>
@@ -586,8 +602,10 @@ export default function DashboardPage() {
         <NeoCard className="p-4 md:p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Shield className="w-5 h-5 text-[#00E5FF]" />
-              <h2 className="font-heading text-lg font-bold text-white">Risk Center</h2>
+              <Shield className="w-5 h-5 text-[#1746FF] dark:text-[#00E5FF]" />
+              <h2 className="font-heading text-lg font-bold text-[#050505] dark:text-white">
+                Risk Center (Guardrails)
+              </h2>
             </div>
             {risk && (
               <NeoBadge
@@ -599,8 +617,8 @@ export default function DashboardPage() {
                     : 'danger'
                 }
               >
-                {risk.riskStatus === 'SAFE' && <ShieldCheck className="w-3 h-3 mr-1" />}
-                {risk.riskStatus !== 'SAFE' && <ShieldAlert className="w-3 h-3 mr-1" />}
+                {risk.riskStatus === 'SAFE' && <ShieldCheck className="w-3.5 h-3.5 mr-1" />}
+                {risk.riskStatus !== 'SAFE' && <ShieldAlert className="w-3.5 h-3.5 mr-1" />}
                 {risk.riskStatus}
               </NeoBadge>
             )}
@@ -609,20 +627,20 @@ export default function DashboardPage() {
             <div className="space-y-4">
               {/* Drawdown Metrics */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-[#07152F] border-2 border-[#1a3a5c] rounded-md p-3">
-                  <p className="text-[10px] font-heading font-bold text-gray-500 uppercase tracking-wider mb-1">
+                <div className="bg-[#F9FAFB] dark:bg-[#07152F] border-2 border-[#050505] shadow-[2px_2px_0px_#050505] rounded-md p-3">
+                  <p className="text-[10px] font-heading font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1">
                     Current Drawdown
                   </p>
                   <p className={cn(
                     'text-xl font-heading font-bold',
-                    risk.currentDrawdown <= 3 ? 'text-[#74FF44]' : risk.currentDrawdown <= 6 ? 'text-[#FFE600]' : 'text-[#FF4B57]'
+                    risk.currentDrawdown <= 3 ? 'text-[#00B843] dark:text-[#74FF44]' : risk.currentDrawdown <= 6 ? 'text-[#FFE600]' : 'text-[#FF4B57]'
                   )}>
                     {risk.currentDrawdown.toFixed(1)}%
                   </p>
                 </div>
-                <div className="bg-[#07152F] border-2 border-[#1a3a5c] rounded-md p-3">
-                  <p className="text-[10px] font-heading font-bold text-gray-500 uppercase tracking-wider mb-1">
-                    Max Drawdown
+                <div className="bg-[#F9FAFB] dark:bg-[#07152F] border-2 border-[#050505] shadow-[2px_2px_0px_#050505] rounded-md p-3">
+                  <p className="text-[10px] font-heading font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1">
+                    Max Drawdown Limit
                   </p>
                   <p className="text-xl font-heading font-bold text-[#FF4B57]">
                     {risk.maxDrawdown.toFixed(1)}%
@@ -631,63 +649,63 @@ export default function DashboardPage() {
               </div>
 
               {/* Margin Health */}
-              <div className="bg-[#07152F] border-2 border-[#1a3a5c] rounded-md p-3">
+              <div className="bg-[#F9FAFB] dark:bg-[#07152F] border-2 border-[#050505] shadow-[2px_2px_0px_#050505] rounded-md p-3">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-[10px] font-heading font-bold text-gray-500 uppercase tracking-wider">
-                    Margin Health
+                  <p className="text-[10px] font-heading font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                    Margin Level (Safety &gt; 500%)
                   </p>
-                  <span className="text-xs font-heading font-bold text-white">
+                  <span className="text-xs font-mono font-bold text-[#050505] dark:text-white">
                     {formatNumber(risk.marginLevel)}%
                   </span>
                 </div>
-                <div className="h-3 bg-[#0D2247] border border-[#1a3a5c] rounded-sm overflow-hidden">
+                <div className="h-3 bg-[#E5E7EB] dark:bg-[#0D2247] border border-[#050505] rounded-sm overflow-hidden">
                   <div
                     className={cn(
                       'h-full rounded-sm transition-all duration-700',
-                      risk.marginLevel >= 500 ? 'bg-[#74FF44]' : risk.marginLevel >= 200 ? 'bg-[#FFE600]' : 'bg-[#FF4B57]'
+                      risk.marginLevel >= 500 ? 'bg-[#00B843] dark:bg-[#74FF44]' : risk.marginLevel >= 200 ? 'bg-[#FFE600]' : 'bg-[#FF4B57]'
                     )}
                     style={{ width: `${Math.min((risk.marginLevel / 2000) * 100, 100)}%` }}
                   />
                 </div>
                 <div className="flex justify-between mt-1">
-                  <span className="text-[9px] text-gray-600">0%</span>
-                  <span className="text-[9px] text-[#FFE600]">Alert: {risk.marginLevelAlert}%</span>
-                  <span className="text-[9px] text-gray-600">2000%</span>
+                  <span className="text-[9px] text-gray-500 font-mono">0%</span>
+                  <span className="text-[9px] text-[#1746FF] dark:text-[#00E5FF] font-mono font-bold">Ambang Batas: {risk.marginLevelAlert}%</span>
+                  <span className="text-[9px] text-gray-500 font-mono">2000%</span>
                 </div>
               </div>
 
               {/* Risk Details Grid */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-[#07152F] border-2 border-[#1a3a5c] rounded-md p-3">
-                  <p className="text-[10px] font-heading font-bold text-gray-500 uppercase tracking-wider mb-1">
-                    Daily Loss
+                <div className="bg-[#F9FAFB] dark:bg-[#07152F] border-2 border-[#050505] shadow-[2px_2px_0px_#050505] rounded-md p-3">
+                  <p className="text-[10px] font-heading font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1">
+                    Daily Loss (Maks 0.5%)
                   </p>
-                  <p className="text-sm font-heading font-bold text-white">
+                  <p className="text-sm font-mono font-bold text-[#050505] dark:text-white">
                     {formatCurrency(risk.maxDailyLoss)} / {formatCurrency(risk.maxDailyLossLimit)}
                   </p>
                 </div>
-                <div className="bg-[#07152F] border-2 border-[#1a3a5c] rounded-md p-3">
-                  <p className="text-[10px] font-heading font-bold text-gray-500 uppercase tracking-wider mb-1">
+                <div className="bg-[#F9FAFB] dark:bg-[#07152F] border-2 border-[#050505] shadow-[2px_2px_0px_#050505] rounded-md p-3">
+                  <p className="text-[10px] font-heading font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1">
                     Risk Per Trade
                   </p>
-                  <p className="text-sm font-heading font-bold text-white">
+                  <p className="text-sm font-mono font-bold text-[#050505] dark:text-white">
                     {risk.currentRiskPerTrade}% / {risk.maxRiskPerTrade}%
                   </p>
                 </div>
-                <div className="bg-[#07152F] border-2 border-[#1a3a5c] rounded-md p-3">
-                  <p className="text-[10px] font-heading font-bold text-gray-500 uppercase tracking-wider mb-1">
-                    Consec. Losses
+                <div className="bg-[#F9FAFB] dark:bg-[#07152F] border-2 border-[#050505] shadow-[2px_2px_0px_#050505] rounded-md p-3">
+                  <p className="text-[10px] font-heading font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1">
+                    Consecutive Loss
                   </p>
-                  <p className="text-sm font-heading font-bold text-white">
-                    {risk.consecutiveLosses} / {risk.maxConsecutiveLosses}
+                  <p className="text-sm font-mono font-bold text-[#050505] dark:text-white">
+                    {risk.consecutiveLosses} / {risk.maxConsecutiveLosses} (Limit 2)
                   </p>
                 </div>
-                <div className="bg-[#07152F] border-2 border-[#1a3a5c] rounded-md p-3">
-                  <p className="text-[10px] font-heading font-bold text-gray-500 uppercase tracking-wider mb-1">
-                    Equity Shield
+                <div className="bg-[#F9FAFB] dark:bg-[#07152F] border-2 border-[#050505] shadow-[2px_2px_0px_#050505] rounded-md p-3">
+                  <p className="text-[10px] font-heading font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1">
+                    Equity Shield (90%)
                   </p>
-                  <p className={cn('text-sm font-heading font-bold', risk.equityShield ? 'text-[#74FF44]' : 'text-[#FF4B57]')}>
-                    {risk.equityShield ? '🛡 ACTIVE' : 'INACTIVE'}
+                  <p className={cn('text-sm font-heading font-bold', risk.equityShield ? 'text-[#00B843] dark:text-[#74FF44]' : 'text-[#FF4B57]')}>
+                    {risk.equityShield ? '🛡 AKTIF' : 'NONAKTIF'}
                   </p>
                 </div>
               </div>
@@ -702,8 +720,10 @@ export default function DashboardPage() {
         <NeoCard className="p-4 md:p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Bot className="w-5 h-5 text-[#00E5FF]" />
-              <h2 className="font-heading text-lg font-bold text-white">Bot Health</h2>
+              <Bot className="w-5 h-5 text-[#1746FF] dark:text-[#00E5FF]" />
+              <h2 className="font-heading text-lg font-bold text-[#050505] dark:text-white">
+                Status EA-Nevan & Robot Health
+              </h2>
             </div>
             <NeoBadge variant="success">{runningBots} Running</NeoBadge>
           </div>
@@ -711,21 +731,24 @@ export default function DashboardPage() {
             {bots?.map((bot) => (
               <div
                 key={bot.id}
-                className="bg-[#07152F] border-2 border-[#1a3a5c] rounded-md p-4 hover:border-[#00E5FF]/40 transition-colors"
+                className="bg-[#F9FAFB] dark:bg-[#07152F] border-2 border-[#050505] shadow-[3px_3px_0px_#050505] rounded-md p-4 transition-all"
               >
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <CircleDot
                       className={cn(
-                        'w-3 h-3',
+                        'w-3.5 h-3.5',
                         bot.status === 'RUNNING'
-                          ? 'text-[#74FF44]'
+                          ? 'text-[#00B843] dark:text-[#74FF44]'
                           : bot.status === 'PAUSED'
                           ? 'text-[#FFE600]'
                           : 'text-[#FF4B57]'
                       )}
                     />
-                    <span className="font-heading font-bold text-white text-sm">{bot.name}</span>
+                    <span className="font-heading font-bold text-[#050505] dark:text-white text-sm">{bot.name}</span>
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 bg-[#E5E7EB] dark:bg-[#0D2247] rounded border border-[#050505] font-bold">
+                      v{bot.version}
+                    </span>
                   </div>
                   <NeoBadge
                     variant={
@@ -740,29 +763,29 @@ export default function DashboardPage() {
                   </NeoBadge>
                 </div>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
-                  <div className="flex items-center gap-1.5 text-gray-400">
-                    <Zap className="w-3 h-3" />
-                    <span>Strategy:</span>
-                    <span className="text-white truncate max-w-[100px]">{bot.strategy}</span>
+                  <div className="flex items-center gap-1.5 text-gray-600 dark:text-gray-400">
+                    <Zap className="w-3.5 h-3.5 text-[#1746FF] dark:text-[#00E5FF]" />
+                    <span>Strategi:</span>
+                    <span className="font-medium text-[#050505] dark:text-white truncate max-w-[120px]">{bot.strategy}</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-gray-400">
-                    <Brain className="w-3 h-3" />
-                    <span>AI:</span>
+                  <div className="flex items-center gap-1.5 text-gray-600 dark:text-gray-400">
+                    <Brain className="w-3.5 h-3.5 text-[#1746FF] dark:text-[#00E5FF]" />
+                    <span>AI Engine:</span>
                     {bot.aiConnection === 'connected' ? (
-                      <span className="text-[#74FF44] flex items-center gap-0.5"><Wifi className="w-3 h-3" /> OK</span>
+                      <span className="text-[#00B843] dark:text-[#74FF44] font-bold flex items-center gap-0.5"><Wifi className="w-3 h-3" /> OK</span>
                     ) : (
-                      <span className="text-[#FF4B57] flex items-center gap-0.5"><WifiOff className="w-3 h-3" /> OFF</span>
+                      <span className="text-[#FF4B57] font-bold flex items-center gap-0.5"><WifiOff className="w-3 h-3" /> OFF</span>
                     )}
                   </div>
-                  <div className="flex items-center gap-1.5 text-gray-400">
-                    <Heart className="w-3 h-3" />
+                  <div className="flex items-center gap-1.5 text-gray-600 dark:text-gray-400">
+                    <Heart className="w-3.5 h-3.5 text-[#FF4B57]" />
                     <span>Heartbeat:</span>
-                    <span className="text-white">Active (&lt;5s ago)</span>
+                    <span className="font-medium text-[#050505] dark:text-white">Aktif (&lt;3s)</span>
                   </div>
-                  <div className="flex items-center gap-1.5 text-gray-400">
-                    <Timer className="w-3 h-3" />
+                  <div className="flex items-center gap-1.5 text-gray-600 dark:text-gray-400">
+                    <Timer className="w-3.5 h-3.5 text-[#FFE600]" />
                     <span>Uptime:</span>
-                    <span className="text-white">{formatDuration(bot.uptime)}</span>
+                    <span className="font-medium text-[#050505] dark:text-white">{formatDuration(bot.uptime)}</span>
                   </div>
                 </div>
               </div>
@@ -774,10 +797,12 @@ export default function DashboardPage() {
         <NeoCard className="p-4 md:p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Activity className="w-5 h-5 text-[#00E5FF]" />
-              <h2 className="font-heading text-lg font-bold text-white">Recent Activities</h2>
+              <Activity className="w-5 h-5 text-[#1746FF] dark:text-[#00E5FF]" />
+              <h2 className="font-heading text-lg font-bold text-[#050505] dark:text-white">
+                Aktivitas & Audit Trail Terbaru
+              </h2>
             </div>
-            <span className="text-[10px] text-gray-500 font-heading uppercase tracking-wider">Live Feed</span>
+            <span className="text-[10px] text-gray-500 font-heading font-bold uppercase tracking-wider">Live Log</span>
           </div>
           <div className="space-y-1">
             {activities?.map((act) => {
@@ -792,28 +817,28 @@ export default function DashboardPage() {
               };
               const IconComp = IconMap[act.icon] || Activity;
               const colorMap: Record<string, string> = {
-                trade: 'text-[#00E5FF]',
+                trade: 'text-[#1746FF] dark:text-[#00E5FF]',
                 ai: 'text-[#1746FF]',
-                bot: 'text-[#74FF44]',
+                bot: 'text-[#00B843] dark:text-[#74FF44]',
                 risk: 'text-[#FFE600]',
-                system: 'text-gray-400',
+                system: 'text-gray-500',
               };
 
               return (
                 <div
                   key={act.id}
-                  className="flex items-start gap-3 p-3 rounded-md hover:bg-[#07152F] transition-colors group"
+                  className="flex items-start gap-3 p-3 rounded-md hover:bg-gray-100 dark:hover:bg-[#07152F] transition-colors group"
                 >
                   <div
                     className={cn(
-                      'w-8 h-8 flex-shrink-0 bg-[#07152F] border-2 border-[#1a3a5c] rounded-md flex items-center justify-center group-hover:border-[#00E5FF]/30 transition-colors',
+                      'w-8 h-8 flex-shrink-0 bg-white dark:bg-[#07152F] border-2 border-[#050505] rounded-md flex items-center justify-center shadow-[2px_2px_0px_#050505]',
                     )}
                   >
-                    <IconComp className={cn('w-4 h-4', colorMap[act.type] || 'text-gray-400')} />
+                    <IconComp className={cn('w-4 h-4', colorMap[act.type] || 'text-gray-500')} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-300 leading-snug">{act.message}</p>
-                    <p className="text-[10px] text-gray-600 mt-0.5 flex items-center gap-1">
+                    <p className="text-sm text-[#050505] dark:text-gray-200 font-medium leading-snug">{act.message}</p>
+                    <p className="text-[10px] text-gray-500 font-mono mt-0.5 flex items-center gap-1">
                       <Clock className="w-3 h-3" />
                       {formatDate(act.timestamp)}
                     </p>
