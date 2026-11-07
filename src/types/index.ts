@@ -224,8 +224,11 @@ export interface UserProfile {
   id: string;
   name: string;
   email: string;
-  role: "admin" | "trader" | "viewer";
+  role: "superadmin" | "admin" | "trader" | "viewer";
   avatar?: string;
+  accountNumber?: string;
+  server?: string;
+  loginAt?: string;
 }
 
 export interface ExnessConnectPayload {

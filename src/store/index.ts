@@ -32,7 +32,11 @@ export interface StoreState extends AppState {
   setSelectedAccount: (accountId: string | null) => void;
   setDemoMode: (demo: boolean) => void;
   setUser: (user: UserProfile | null) => void;
-  login: (email: string, name?: string) => void;
+  login: (
+    email: string,
+    name?: string,
+    role?: "superadmin" | "admin" | "trader" | "viewer"
+  ) => void;
   logout: () => void;
   setTheme: (theme: "light" | "dark") => void;
   toggleTheme: () => void;
@@ -141,13 +145,13 @@ export const useAppStore = create<StoreState>()(
         set({ theme: next });
       },
 
-      login: (email, name = "Exness Trader") =>
+      login: (email, name = "Exness Trader", role = "trader") =>
         set({
           user: {
             id: `usr-${Date.now()}`,
             name,
             email,
-            role: "trader",
+            role,
           },
           isAuthenticated: true,
         }),

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   NeoCard,
   NeoBadge,
@@ -45,9 +45,16 @@ export default function SettingsPage() {
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
 
   // User Profile
-  const [userName, setUserName] = useState(user?.name || "Donny Kurniawan (EA-Nevan)");
-  const [userEmail, setUserEmail] = useState(user?.email || "donny@ea-nevan.trade");
+  const [userName, setUserName] = useState(user?.name || "Superadmin GoldShield");
+  const [userEmail, setUserEmail] = useState(user?.email || "superadmin@goldshield.ai");
   const [gatewayUrl, setGatewayUrl] = useState("http://localhost:8000");
+
+  useEffect(() => {
+    if (user) {
+      setUserName(user.name);
+      setUserEmail(user.email);
+    }
+  }, [user]);
 
   // Form states (Risk)
   const [maxDrawdown, setMaxDrawdown] = useState(String(riskMetrics.maxDrawdown));
@@ -125,11 +132,27 @@ export default function SettingsPage() {
       <form onSubmit={handleSave} className="space-y-6">
         {/* 1. Account & Environment Setting */}
         <NeoCard className="p-5">
-          <div className="flex items-center gap-2 mb-4 border-b-2 border-[#050505] pb-3">
-            <User className="w-5 h-5 text-[#1746FF] dark:text-[#00E5FF]" />
-            <h3 className="font-heading font-bold text-[#050505] dark:text-white text-base">
-              Profil Pengguna & Target Akun
-            </h3>
+          <div className="flex items-center justify-between mb-4 border-b-2 border-[#050505] pb-3">
+            <div className="flex items-center gap-2">
+              <User className="w-5 h-5 text-[#1746FF] dark:text-[#00E5FF]" />
+              <h3 className="font-heading font-bold text-[#050505] dark:text-white text-base">
+                Profil Pengguna & Target Akun
+              </h3>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-gray-500 font-mono hidden sm:inline">HAK AKSES:</span>
+              <span
+                className={`text-[10px] font-heading font-bold px-2 py-0.5 rounded border border-[#050505] shadow-[1px_1px_0px_#050505] ${
+                  user?.role === "superadmin"
+                    ? "bg-[#1746FF] text-white"
+                    : user?.role === "admin"
+                    ? "bg-[#FFE600] text-[#050505]"
+                    : "bg-[#74FF44] text-[#050505]"
+                }`}
+              >
+                👑 {(user?.role || "superadmin").toUpperCase()}
+              </span>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAppStore } from "@/store";
 import {
   Bell,
@@ -21,6 +22,7 @@ import {
 } from "lucide-react";
 
 export default function Navbar() {
+  const router = useRouter();
   const {
     demoMode,
     accounts,
@@ -39,6 +41,21 @@ export default function Navbar() {
   const activeAccount =
     accounts.find((a) => a.id === selectedAccount) || accounts[0];
   const unreadNotifs = notifications?.filter((n) => !n.read).length ?? 0;
+
+  const userName = user?.name || "Superadmin GoldShield";
+  const userEmail = user?.email || "superadmin@goldshield.ai";
+  const userRole = user?.role || "superadmin";
+
+  const handleLogout = async () => {
+    setUserDropdownOpen(false);
+    try {
+      await fetch("/api/auth/logout", { method: "POST" });
+    } catch (err) {
+      console.error("Logout request error:", err);
+    }
+    logout();
+    router.push("/login");
+  };
 
   return (
     <header className="sticky top-0 z-30 bg-[#FFFFFF] dark:bg-[#07152F] border-b-2 border-[#050505] px-4 md:px-6 py-3 transition-colors duration-200">
@@ -213,20 +230,46 @@ export default function Navbar() {
               <div className="w-7 h-7 bg-[#1746FF] border-2 border-[#050505] shadow-[2px_2px_0px_#050505] rounded-md flex items-center justify-center">
                 <User className="w-4 h-4 text-white" />
               </div>
-              <span className="hidden sm:block text-xs font-heading font-bold text-[#050505] dark:text-white">
-                Donny K.
-              </span>
+              <div className="hidden sm:flex items-center gap-1.5">
+                <span className="text-xs font-heading font-bold text-[#050505] dark:text-white max-w-[120px] truncate">
+                  {userName}
+                </span>
+                <span
+                  className={`text-[9px] font-heading font-bold px-1.5 py-0.5 rounded border border-[#050505] ${
+                    userRole === "superadmin"
+                      ? "bg-[#1746FF] text-white"
+                      : userRole === "admin"
+                      ? "bg-[#FFE600] text-[#050505]"
+                      : "bg-[#74FF44] text-[#050505]"
+                  }`}
+                >
+                  {userRole.toUpperCase()}
+                </span>
+              </div>
               <ChevronDown className="hidden sm:block w-3 h-3 text-gray-500" />
             </button>
 
             {userDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-[#FFFFFF] dark:bg-[#0D2247] border-2 border-[#050505] shadow-[4px_4px_0px_#050505] rounded-md p-2 z-50 space-y-2">
-                <div className="p-2 border-b border-gray-200 dark:border-[#132D5E]">
-                  <p className="text-xs font-heading font-bold text-[#050505] dark:text-white truncate">
-                    Donny Kurniawan (EA-Nevan)
-                  </p>
+              <div className="absolute right-0 mt-2 w-64 bg-[#FFFFFF] dark:bg-[#0D2247] border-2 border-[#050505] shadow-[4px_4px_0px_#050505] rounded-md p-2 z-50 space-y-2">
+                <div className="p-2 border-b border-gray-200 dark:border-[#132D5E] space-y-1">
+                  <div className="flex items-center justify-between gap-1">
+                    <p className="text-xs font-heading font-bold text-[#050505] dark:text-white truncate">
+                      {userName}
+                    </p>
+                    <span
+                      className={`text-[9px] font-heading font-bold px-1.5 py-0.2 rounded border border-[#050505] ${
+                        userRole === "superadmin"
+                          ? "bg-[#1746FF] text-white"
+                          : userRole === "admin"
+                          ? "bg-[#FFE600] text-[#050505]"
+                          : "bg-[#74FF44] text-[#050505]"
+                      }`}
+                    >
+                      {userRole.toUpperCase()}
+                    </span>
+                  </div>
                   <p className="text-[10px] text-gray-500 font-mono truncate">
-                    donny@ea-nevan.trade
+                    {userEmail}
                   </p>
                 </div>
 
@@ -245,16 +288,13 @@ export default function Navbar() {
                   className="flex items-center gap-2 w-full p-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-[#F3F4F6] dark:hover:bg-[#07152F] rounded transition-colors"
                 >
                   <Shield className="w-3.5 h-3.5 text-[#1746FF] dark:text-[#00E5FF]" />
-                  <span>Pengaturan Guardrail</span>
+                  <span>Pengaturan Guardrail & Profil</span>
                 </Link>
 
                 <div className="pt-1 border-t border-gray-200 dark:border-[#132D5E]">
                   <button
-                    onClick={() => {
-                      logout();
-                      setUserDropdownOpen(false);
-                    }}
-                    className="flex items-center gap-2 w-full p-2 text-xs text-[#FF4B57] hover:bg-[#F3F4F6] dark:hover:bg-[#07152F] rounded transition-colors"
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 w-full p-2 text-xs text-[#FF4B57] hover:bg-[#FF4B57]/10 rounded transition-colors font-heading font-bold"
                   >
                     <LogOut className="w-3.5 h-3.5" />
                     <span>Keluar (Logout)</span>
