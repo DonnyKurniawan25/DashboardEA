@@ -152,7 +152,7 @@ export default function SettingsPage() {
         {/* 2. Risk Management Thresholds */}
         <NeoCard className="p-5">
           <div className="flex items-center gap-2 mb-4 border-b-2 border-[#050505] pb-3">
-            <Shield className="w-5 h-5 text-[#FFE600]" />
+            <Shield className="w-5 h-5 text-[#1746FF] dark:text-[#00E5FF]" />
             <h3 className="font-heading font-bold text-[#050505] dark:text-white text-base">
               Guardrails Modal & Batas Stop EA-Nevan
             </h3>

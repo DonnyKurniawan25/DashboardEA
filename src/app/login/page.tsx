@@ -388,9 +388,9 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={handleQuickDemo}
-                className="w-full py-2 bg-[#FFE600]/20 hover:bg-[#FFE600]/40 text-[#050505] dark:text-[#FFE600] border-2 border-[#050505] rounded text-xs font-heading font-bold flex items-center justify-center gap-1.5 transition-colors shadow-[2px_2px_0px_#050505]"
+                className="w-full py-2 bg-[#FFE600] hover:bg-[#ffe000] text-[#050505] border-2 border-[#050505] rounded text-xs font-heading font-bold flex items-center justify-center gap-1.5 transition-colors shadow-[2px_2px_0px_#050505]"
               >
-                <Zap className="w-3.5 h-3.5 text-[#1746FF] dark:text-[#FFE600]" />
+                <Zap className="w-3.5 h-3.5 text-[#050505]" />
                 Gunakan Contoh Akun Exness Demo (1-Click)
               </button>
             </form>

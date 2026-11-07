@@ -172,7 +172,7 @@ MinMarginLevelPct=500.0`;
           <p className="text-[10px] font-heading font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-1">
             Standby / Paused
           </p>
-          <p className="text-2xl font-heading font-bold text-[#FFE600]">
+          <p className="text-2xl font-heading font-bold text-[#D97706] dark:text-[#FFE600]">
             {pausedCount} PAUSED
           </p>
           <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">Manual pause state</p>
@@ -296,7 +296,7 @@ MinMarginLevelPct=500.0`}
         <NeoCard className="p-5 space-y-3">
           <div className="border-b-2 border-[#050505] pb-2">
             <h3 className="font-heading font-bold text-base text-[#050505] dark:text-white flex items-center gap-1.5">
-              <Zap className="w-4 h-4 text-[#FFE600]" /> Panduan Pasang EA di MT5
+              <Zap className="w-4 h-4 text-[#1746FF] dark:text-[#00E5FF]" /> Panduan Pasang EA di MT5
             </h3>
             <p className="text-xs text-gray-600 dark:text-gray-400">
               Langkah mengaktifkan EA-Nevan di MetaTrader 5
@@ -523,7 +523,7 @@ MinMarginLevelPct=500.0`}
                           <div key={log.id} className="text-gray-700 dark:text-gray-300 leading-tight">
                             <span className={cn(
                               "font-bold mr-1",
-                              log.level === "ERROR" || log.level === "CRITICAL" ? "text-[#FF4B57]" : log.level === "WARNING" ? "text-[#FFE600]" : "text-[#1746FF] dark:text-[#00E5FF]"
+                              log.level === "ERROR" || log.level === "CRITICAL" ? "text-[#FF4B57]" : log.level === "WARNING" ? "text-[#D97706] dark:text-[#FFE600]" : "text-[#1746FF] dark:text-[#00E5FF]"
                             )}>
                               [{log.level}]
                             </span>

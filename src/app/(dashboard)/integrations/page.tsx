@@ -125,7 +125,7 @@ export default function IntegrationsPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-5 gap-3 text-center">
           <div className="p-3 bg-[#F9FAFB] dark:bg-[#07152F] border-2 border-[#050505] rounded-md shadow-[2px_2px_0px_#050505]">
-            <span className="text-[10px] font-heading font-bold text-[#1746FF] dark:text-[#FFE600] uppercase block">
+            <span className="text-[10px] font-heading font-bold text-[#1746FF] dark:text-[#00E5FF] uppercase block">
               Level 1
             </span>
             <span className="font-heading font-bold text-[#050505] dark:text-white text-sm block mt-0.5">
@@ -188,7 +188,7 @@ export default function IntegrationsPage() {
                   ) : item.type === "TELEGRAM" ? (
                     <Send className="w-5 h-5 text-[#00B843] dark:text-[#74FF44]" />
                   ) : item.type === "API" ? (
-                    <Code2 className="w-5 h-5 text-[#FFE600]" />
+                    <Code2 className="w-5 h-5 text-[#1746FF] dark:text-[#00E5FF]" />
                   ) : (
                     <Globe className="w-5 h-5 text-[#1746FF]" />
                   )}

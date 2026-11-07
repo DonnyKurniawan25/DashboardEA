@@ -633,7 +633,7 @@ export default function DashboardPage() {
                   </p>
                   <p className={cn(
                     'text-xl font-heading font-bold',
-                    risk.currentDrawdown <= 3 ? 'text-[#00B843] dark:text-[#74FF44]' : risk.currentDrawdown <= 6 ? 'text-[#FFE600]' : 'text-[#FF4B57]'
+                    risk.currentDrawdown <= 3 ? 'text-[#00B843] dark:text-[#74FF44]' : risk.currentDrawdown <= 6 ? 'text-[#D97706] dark:text-[#FFE600]' : 'text-[#FF4B57]'
                   )}>
                     {risk.currentDrawdown.toFixed(1)}%
                   </p>
@@ -741,7 +741,7 @@ export default function DashboardPage() {
                         bot.status === 'RUNNING'
                           ? 'text-[#00B843] dark:text-[#74FF44]'
                           : bot.status === 'PAUSED'
-                          ? 'text-[#FFE600]'
+                          ? 'text-[#D97706] dark:text-[#FFE600]'
                           : 'text-[#FF4B57]'
                       )}
                     />
@@ -783,7 +783,7 @@ export default function DashboardPage() {
                     <span className="font-medium text-[#050505] dark:text-white">Aktif (&lt;3s)</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-gray-600 dark:text-gray-400">
-                    <Timer className="w-3.5 h-3.5 text-[#FFE600]" />
+                    <Timer className="w-3.5 h-3.5 text-[#1746FF] dark:text-[#00E5FF]" />
                     <span>Uptime:</span>
                     <span className="font-medium text-[#050505] dark:text-white">{formatDuration(bot.uptime)}</span>
                   </div>
@@ -820,7 +820,7 @@ export default function DashboardPage() {
                 trade: 'text-[#1746FF] dark:text-[#00E5FF]',
                 ai: 'text-[#1746FF]',
                 bot: 'text-[#00B843] dark:text-[#74FF44]',
-                risk: 'text-[#FFE600]',
+                risk: 'text-[#D97706] dark:text-[#FFE600]',
                 system: 'text-gray-500',
               };
 

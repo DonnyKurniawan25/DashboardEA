@@ -175,7 +175,7 @@ export default function OpenPositionsPage() {
             <p className="text-[10px] font-heading font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider">
               Total Lot Berjalan
             </p>
-            <BarChart3 className="w-4 h-4 text-[#FFE600]" />
+            <BarChart3 className="w-4 h-4 text-[#1746FF] dark:text-[#00E5FF]" />
           </div>
           <p className="text-2xl font-mono font-bold text-[#050505] dark:text-white">
             {formatNumber(totalLots, 2)} Lot

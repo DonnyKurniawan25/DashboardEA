@@ -60,16 +60,16 @@ export function getStatusColor(status: string): string {
     case "connected":
     case "active":
     case "buy":
-      return "text-[#74FF44]";
+      return "text-[#00B843] dark:text-[#74FF44]";
     case "error":
     case "disconnected":
     case "sell":
       return "text-[#FF4B57]";
     case "paused":
     case "warning":
-      return "text-[#FFE600]";
+      return "text-[#D97706] dark:text-[#FFE600]";
     default:
-      return "text-white";
+      return "text-[#050505] dark:text-white";
   }
 }
 

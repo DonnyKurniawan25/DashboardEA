@@ -425,7 +425,7 @@ export default function RiskCenterPage() {
       <NeoCard className="p-0 overflow-hidden">
         <div className="p-4 border-b-2 border-[#050505] bg-[#F9FAFB] dark:bg-[#07152F] flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <BellRing className="w-5 h-5 text-[#1746FF] dark:text-[#FFE600]" />
+            <BellRing className="w-5 h-5 text-[#1746FF] dark:text-[#00E5FF]" />
             <h3 className="font-heading font-bold text-[#050505] dark:text-white text-base">
               Riwayat Kejadian Risiko & Audit Sistem
             </h3>
@@ -466,7 +466,7 @@ export default function RiskCenterPage() {
                     <CheckCircle2 className="w-3.5 h-3.5" /> Teratasi
                   </span>
                 ) : (
-                  <span className="text-[10px] font-bold text-[#FFE600] flex items-center gap-1">
+                  <span className="text-[10px] font-bold text-[#D97706] dark:text-[#FFE600] flex items-center gap-1">
                     <AlertTriangle className="w-3.5 h-3.5" /> Aktif
                   </span>
                 )}

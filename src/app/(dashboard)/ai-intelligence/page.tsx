@@ -247,7 +247,7 @@ export default function AIIntelligencePage() {
               {/* 2. Technical Confluence (EMA & RSI) */}
               <div className="p-3.5 bg-[#F9FAFB] dark:bg-[#07152F] border-2 border-[#050505] rounded-md space-y-2 shadow-[2px_2px_0px_#050505]">
                 <p className="text-[10px] font-heading font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
-                  <Activity className="w-3.5 h-3.5 text-[#FFE600]" /> Momentum & RSI(14)
+                  <Activity className="w-3.5 h-3.5 text-[#1746FF] dark:text-[#00E5FF]" /> Momentum & RSI(14)
                 </p>
                 <div className="pt-1">
                   <div className="flex justify-between items-center text-xs mb-1">

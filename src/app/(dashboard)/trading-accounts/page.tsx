@@ -169,7 +169,7 @@ function AccountCard({ account }: { account: TradingAccount }) {
             account.marginLevel > 500
               ? "text-[#00B843] dark:text-[#74FF44]"
               : account.marginLevel > 200
-                ? "text-[#FFE600]"
+                ? "text-[#D97706] dark:text-[#FFE600]"
                 : "text-[#FF3B30] dark:text-[#FF4B57]"
           }
         />
@@ -290,7 +290,9 @@ export default function TradingAccountsPage() {
               {hasMixedCurrencies ? "—" : formatCurrency(totalBalance)}
             </p>
             {hasMixedCurrencies ? (
-              <p className="text-[10px] text-[#FFE600] font-bold">Mata Uang Berbeda</p>
+              <span className="inline-block mt-1 px-1.5 py-0.5 bg-[#FFE600] text-[#050505] text-[10px] font-bold border border-[#050505] rounded shadow-[1px_1px_0px_#050505]">
+                Mata Uang Berbeda
+              </span>
             ) : (
               <p className="text-xs text-gray-500 font-medium mt-0.5">Saldo Tersedia</p>
             )}
@@ -303,7 +305,9 @@ export default function TradingAccountsPage() {
               {hasMixedCurrencies ? "—" : formatCurrency(totalEquity)}
             </p>
             {hasMixedCurrencies ? (
-              <p className="text-[10px] text-[#FFE600] font-bold">Mata Uang Berbeda</p>
+              <span className="inline-block mt-1 px-1.5 py-0.5 bg-[#FFE600] text-[#050505] text-[10px] font-bold border border-[#050505] rounded shadow-[1px_1px_0px_#050505]">
+                Mata Uang Berbeda
+              </span>
             ) : (
               <p className="text-xs text-[#00B843] dark:text-[#74FF44] font-medium mt-0.5">Net Worth</p>
             )}
@@ -325,7 +329,9 @@ export default function TradingAccountsPage() {
                 : `${totalFloating >= 0 ? "+" : ""}${formatCurrency(totalFloating)}`}
             </p>
             {hasMixedCurrencies ? (
-              <p className="text-[10px] text-[#FFE600] font-bold">Mata Uang Berbeda</p>
+              <span className="inline-block mt-1 px-1.5 py-0.5 bg-[#FFE600] text-[#050505] text-[10px] font-bold border border-[#050505] rounded shadow-[1px_1px_0px_#050505]">
+                Mata Uang Berbeda
+              </span>
             ) : (
               <p className="text-xs text-gray-500 font-medium mt-0.5">Posisi Berjalan</p>
             )}
@@ -335,10 +341,12 @@ export default function TradingAccountsPage() {
 
       {/* Mixed Currency Warning */}
       {hasMixedCurrencies && !loading && (
-        <div className="p-3.5 bg-[#FFE600]/15 border-2 border-[#050505] shadow-[4px_4px_0px_#050505] rounded-md flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-[#FFE600] shrink-0 mt-0.5" />
+        <div className="p-3.5 bg-[#FFFBEB] dark:bg-[#07152F] border-2 border-[#050505] shadow-[4px_4px_0px_#050505] rounded-md flex items-start gap-3">
+          <div className="w-8 h-8 rounded bg-[#FFE600] border-2 border-[#050505] flex items-center justify-center shrink-0 mt-0.5 shadow-[1px_1px_0px_#050505]">
+            <AlertTriangle className="w-4 h-4 text-[#050505]" />
+          </div>
           <div>
-            <p className="text-sm font-heading font-bold text-[#050505] dark:text-[#FFE600]">
+            <p className="text-sm font-heading font-bold text-[#050505] dark:text-white">
               Peringatan Mata Uang Berbeda (Mixed Currency Guard)
             </p>
             <p className="text-xs text-gray-700 dark:text-gray-300 mt-0.5 leading-relaxed">

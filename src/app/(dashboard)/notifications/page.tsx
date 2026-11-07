@@ -93,7 +93,7 @@ export default function NotificationsPage() {
         return <ShieldAlert className="w-5 h-5 text-[#FF3B30] dark:text-[#FF4B57]" />;
       case "EA_DISCONNECTED":
       case "API_TIMEOUT":
-        return <AlertTriangle className="w-5 h-5 text-[#FFE600]" />;
+        return <AlertTriangle className="w-5 h-5 text-[#D97706] dark:text-[#FFE600]" />;
       default:
         return <Bell className="w-5 h-5 text-[#1746FF] dark:text-[#00E5FF]" />;
     }

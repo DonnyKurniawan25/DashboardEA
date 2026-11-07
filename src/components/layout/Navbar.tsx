@@ -238,7 +238,7 @@ export default function Navbar() {
                   onClick={() => setUserDropdownOpen(false)}
                   className="flex items-center gap-2 w-full p-2 text-xs text-gray-700 dark:text-gray-300 hover:bg-[#F3F4F6] dark:hover:bg-[#07152F] rounded transition-colors"
                 >
-                  <Shield className="w-3.5 h-3.5 text-[#FFE600]" />
+                  <Shield className="w-3.5 h-3.5 text-[#1746FF] dark:text-[#00E5FF]" />
                   <span>Pengaturan Guardrail</span>
                 </Link>
 
