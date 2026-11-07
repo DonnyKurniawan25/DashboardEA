@@ -219,9 +219,30 @@ export interface Integration {
   config: Record<string, unknown>;
 }
 
+// ===== User & Auth Types =====
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  role: "admin" | "trader" | "viewer";
+  avatar?: string;
+}
+
+export interface ExnessConnectPayload {
+  accountNumber: string;
+  password?: string;
+  server: string;
+  type: "demo" | "real";
+  currency: string;
+  leverage: string;
+}
+
 // ===== App State =====
 export interface AppState {
+  user: UserProfile | null;
+  isAuthenticated: boolean;
   selectedAccount: string | null;
+  accounts: TradingAccount[];
   demoMode: boolean;
   sidebarCollapsed: boolean;
   theme: "dark";
